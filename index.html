@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Daily Sylhet — Truth &amp; Trust</title>
+  <title>Norun Alo — Truth &amp; Trust</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -90,8 +90,8 @@
       </span>
       <div class="ticker-wrapper overflow-hidden flex-1 text-sm font-medium text-neutral-900">
         <div id="breakingTicker" class="ticker-track">
-          <span class="mr-12">Daily Sylhet — Loading latest news...</span>
-          <span class="mr-12">Daily Sylhet — Loading latest news...</span>
+          <span class="mr-12">Norun Alo — Loading latest news...</span>
+          <span class="mr-12">Norun Alo — Loading latest news...</span>
         </div>
       </div>
     </div>
@@ -148,7 +148,7 @@
   <!-- Footer -->
   <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
     <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2">
-      <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Daily Sylhet. All rights reserved.</p>
+      <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Norun Alo. All rights reserved.</p>
       <div class="flex items-center gap-4">
         <span>Sylhet's Trusted News Portal</span>
         <a href="admin.html" class="text-neutral-700 hover:text-red-600 underline">Admin Desk</a>
@@ -303,7 +303,7 @@
 
       function updateTicker(posts) {
         if (!posts.length) {
-          const fallback = 'Daily Sylhet — No published posts yet. Publish from Admin.';
+          const fallback = 'Norun Alo — No published posts yet. Publish from Admin.';
           breakingTicker.innerHTML = `<span class="mr-12">${escapeHtml(fallback)}</span><span class="mr-12">${escapeHtml(fallback)}</span>`;
           return;
         }
@@ -353,7 +353,7 @@
 
         const heroImgHtml = heroPost.image
           ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
-          : `<div class="w-full h-64 sm:h-80 lg:h-96 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Daily Sylhet</div>`;
+          : `<div class="w-full h-64 sm:h-80 lg:h-96 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Norun Alo</div>`;
 
         heroSection.innerHTML = `
           <article data-filename="${escapeHtml(heroPost.filename)}" class="article-card group grid grid-cols-1 lg:grid-cols-12 gap-6 items-center cursor-pointer">
@@ -388,7 +388,7 @@
           postsGrid.innerHTML = remainingPosts.map(function (post) {
             const imgHtml = post.image
               ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" class="w-full h-48 object-cover rounded-sm border border-neutral-200 mb-3" onerror="this.style.display='none'" />`
-              : `<div class="w-full h-48 bg-neutral-100 border border-neutral-200 rounded-sm mb-3 flex items-center justify-center text-neutral-400 font-editorial text-lg">Daily Sylhet</div>`;
+              : `<div class="w-full h-48 bg-neutral-100 border border-neutral-200 rounded-sm mb-3 flex items-center justify-center text-neutral-400 font-editorial text-lg">Norun Alo</div>`;
 
             return `
               <article data-filename="${escapeHtml(post.filename)}" class="article-card group border-b border-neutral-200 pb-5 flex flex-col cursor-pointer">
