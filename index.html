@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en"> 
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -39,25 +39,6 @@
 </head>
 <body class="bg-white text-neutral-900 min-h-screen flex flex-col">
 
-  <!-- Top GitHub Config Bar -->
-  <div class="bg-neutral-950 text-neutral-200 border-b border-neutral-800 text-xs">
-    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
-      <div class="flex flex-wrap items-center gap-2">
-        <span class="font-semibold text-red-500 uppercase tracking-wider mr-1">GitHub Source:</span>
-        <input id="cfgOwner" type="text" value="mrx547835-ai" placeholder="Owner" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
-        <input id="cfgRepo" type="text" value="Notun-Alo" placeholder="Repo" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
-        <input id="cfgBranch" type="text" value="main" placeholder="Branch" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-24" />
-        <button id="reloadBtn" type="button" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded transition cursor-pointer">
-          Reload
-        </button>
-      </div>
-      <div class="flex items-center gap-3">
-        <span id="repoStatus" class="text-neutral-400"></span>
-        <a href="admin.html" class="text-neutral-300 hover:text-white underline underline-offset-2">Admin Panel</a>
-      </div>
-    </div>
-  </div>
-
   <!-- Masthead / Header -->
   <header class="border-b-2 border-black bg-white">
     <div class="max-w-7xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-center justify-between gap-3">
@@ -75,13 +56,16 @@
         </a>
       </div>
 
-      <div class="order-3 md:w-1/4 flex justify-center md:justify-end w-full">
+      <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end gap-2 w-full">
         <div class="relative w-full max-w-xs">
           <input id="searchInput" type="search" placeholder="Search headlines..." class="w-full border border-neutral-300 rounded-sm pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:border-black" />
           <svg class="w-4 h-4 text-neutral-500 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
           </svg>
         </div>
+        <a href="admin.html" class="shrink-0 text-xs font-semibold text-neutral-600 hover:text-red-600 border border-neutral-300 hover:border-red-600 px-2.5 py-1.5 rounded-sm transition">
+          Admin
+        </a>
       </div>
     </div>
 
@@ -117,14 +101,14 @@
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:py-8">
     <div id="loadingState" class="hidden py-16 text-center">
       <div class="inline-block w-8 h-8 border-4 border-neutral-300 border-t-red-600 rounded-full animate-spin mb-3"></div>
-      <p class="text-sm text-neutral-600 font-medium">Fetching latest editions from GitHub...</p>
+      <p class="text-sm text-neutral-600 font-medium">Fetching latest news...</p>
     </div>
 
     <div id="errorBanner" class="hidden mb-6 border-l-4 border-red-600 bg-red-50 text-red-900 p-4 text-sm"></div>
 
     <div id="emptyState" class="hidden py-20 text-center border border-dashed border-neutral-300 rounded">
       <p class="font-editorial text-2xl font-bold text-neutral-800 mb-2">No published posts yet. Publish from Admin.</p>
-      <p id="emptySubtext" class="text-sm text-neutral-500">Make sure your GitHub Owner, Repo, and Branch are configured above.</p>
+      <p id="emptySubtext" class="text-sm text-neutral-500">New articles published from Admin will appear here automatically.</p>
     </div>
 
     <section id="heroSection" class="hidden mb-8 pb-8 border-b border-neutral-300"></section>
@@ -165,7 +149,10 @@
   <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
     <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2">
       <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Daily Sylhet. All rights reserved.</p>
-      <p>Powered by GitHub Content API • Static Newspaper Architecture</p>
+      <div class="flex items-center gap-4">
+        <span>Sylhet's Trusted News Portal</span>
+        <a href="admin.html" class="text-neutral-700 hover:text-red-600 underline">Admin Desk</a>
+      </div>
     </div>
   </footer>
 
@@ -173,22 +160,13 @@
     (function () {
       'use strict';
 
-      // NOTE: Front page NEVER reads from or accesses IndexedDB. GitHub Repo is the sole source of truth.
-      const LS_KEYS = {
-        owner: 'ds_gh_owner',
-        repo: 'ds_gh_repo',
-        branch: 'ds_gh_branch'
+      // NOTE: Front page NEVER reads from or accesses IndexedDB. GitHub Repo is the source of truth.
+      const GH_CONFIG = {
+        owner: localStorage.getItem('ds_gh_owner') || 'mrx547835-ai',
+        repo: localStorage.getItem('ds_gh_repo') || 'Notun-Alo',
+        branch: localStorage.getItem('ds_gh_branch') || 'main'
       };
-
-      const DEFAULT_OWNER = 'mrx547835-ai';
-      const DEFAULT_REPO = 'Notun-Alo';
-      const DEFAULT_BRANCH = 'main';
-
-      const cfgOwner = document.getElementById('cfgOwner');
-      const cfgRepo = document.getElementById('cfgRepo');
-      const cfgBranch = document.getElementById('cfgBranch');
-      const reloadBtn = document.getElementById('reloadBtn');
-      const repoStatus = document.getElementById('repoStatus');
+      const CACHE_KEY = `ds_posts_cache_${GH_CONFIG.owner}_${GH_CONFIG.repo}_${GH_CONFIG.branch}`;
 
       const liveDateEl = document.getElementById('liveDate');
       const footerYearEl = document.getElementById('footerYear');
@@ -313,18 +291,6 @@
         };
       }
 
-      function saveConfigToLocalStorage() {
-        localStorage.setItem(LS_KEYS.owner, cfgOwner.value.trim() || DEFAULT_OWNER);
-        localStorage.setItem(LS_KEYS.repo, cfgRepo.value.trim() || DEFAULT_REPO);
-        localStorage.setItem(LS_KEYS.branch, cfgBranch.value.trim() || DEFAULT_BRANCH);
-      }
-
-      function loadConfigFromLocalStorage() {
-        cfgOwner.value = localStorage.getItem(LS_KEYS.owner) || DEFAULT_OWNER;
-        cfgRepo.value = localStorage.getItem(LS_KEYS.repo) || DEFAULT_REPO;
-        cfgBranch.value = localStorage.getItem(LS_KEYS.branch) || DEFAULT_BRANCH;
-      }
-
       function showError(msg) {
         errorBanner.textContent = msg;
         errorBanner.classList.remove('hidden');
@@ -368,7 +334,8 @@
 
         if (allPosts.length === 0) {
           emptyState.classList.remove('hidden');
-          emptySubtext.textContent = 'Publish a post from admin.html or verify your GitHub repo settings above.';
+          document.querySelector('#emptyState p').textContent = 'No published posts yet. Publish from Admin.';
+          emptySubtext.textContent = 'New articles published from Admin will appear here automatically.';
           return;
         }
 
@@ -493,67 +460,113 @@
         document.body.classList.remove('overflow-hidden');
       }
 
+      async function fetchMarkdownText(fileName, owner, repo, branch) {
+        const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}?t=${Date.now()}`;
+        const res = await fetch(rawUrl, { cache: 'no-store' });
+        if (res.ok) return await res.text();
+
+        const cdnUrl = `https://cdn.jsdelivr.net/gh/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}`;
+        const cdnRes = await fetch(cdnUrl, { cache: 'no-store' });
+        if (cdnRes.ok) return await cdnRes.text();
+
+        throw new Error(`Failed to fetch ${fileName}`);
+      }
+
+      async function getMarkdownFileList(owner, repo, branch) {
+        // 1. Try posts/index.json on raw.githubusercontent.com (NO API rate limit)
+        const manifestUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/index.json?t=${Date.now()}`;
+        try {
+          const manifestRes = await fetch(manifestUrl, { cache: 'no-store' });
+          if (manifestRes.ok) {
+            const list = await manifestRes.json();
+            if (Array.isArray(list)) {
+              return list.filter(function (name) {
+                return typeof name === 'string' && name.toLowerCase().endsWith('.md');
+              }).map(function (name) {
+                return {
+                  name: name,
+                  download_url: `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(name)}?t=${Date.now()}`
+                };
+              });
+            }
+          }
+        } catch (_) { /* fall through */ }
+
+        // 2. Try GitHub Contents API
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
+        try {
+          const apiRes = await fetch(apiUrl, {
+            headers: { 'Accept': 'application/vnd.github+json' },
+            cache: 'no-store'
+          });
+          if (apiRes.status === 404) {
+            return [];
+          }
+          if (apiRes.ok) {
+            const items = await apiRes.json();
+            if (Array.isArray(items)) {
+              return items.filter(function (item) {
+                return item.type === 'file' && item.name.toLowerCase().endsWith('.md') && item.download_url;
+              }).map(function (item) {
+                return { name: item.name, download_url: item.download_url };
+              });
+            }
+          }
+        } catch (_) { /* fall through to jsDelivr */ }
+
+        // 3. Fallback to jsDelivr API (no GitHub 60/hr IP rate limit!)
+        const jsdUrl = `https://data.jsdelivr.com/v1/packages/gh/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}?structure=flat`;
+        const jsdRes = await fetch(jsdUrl, { cache: 'no-store' });
+        if (jsdRes.status === 404) {
+          return [];
+        }
+        if (!jsdRes.ok) {
+          throw new Error(`Unable to fetch post list (status ${jsdRes.status})`);
+        }
+        const jsdData = await jsdRes.json();
+        const files = Array.isArray(jsdData.files) ? jsdData.files : [];
+        return files
+          .filter(function (f) {
+            return typeof f.name === 'string' && f.name.startsWith('/posts/') && f.name.toLowerCase().endsWith('.md');
+          })
+          .map(function (f) {
+            const cleanName = f.name.slice('/posts/'.length);
+            return {
+              name: cleanName,
+              download_url: `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(cleanName)}?t=${Date.now()}`
+            };
+          });
+      }
+
       async function fetchPublishedPosts() {
         hideError();
-        saveConfigToLocalStorage();
-
-        const owner = cfgOwner.value.trim() || DEFAULT_OWNER;
-        const repo = cfgRepo.value.trim() || DEFAULT_REPO;
-        const branch = cfgBranch.value.trim() || DEFAULT_BRANCH;
-
-        allPosts = [];
-        updateTicker([]);
-
-        repoStatus.textContent = `${owner}/${repo} (${branch})`;
         loadingState.classList.remove('hidden');
         emptyState.classList.add('hidden');
         heroSection.classList.add('hidden');
         gridSection.classList.add('hidden');
 
-        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
+        const { owner, repo, branch } = GH_CONFIG;
 
         try {
-          const res = await fetch(apiUrl, {
-            headers: { 'Accept': 'application/vnd.github+json' },
-            cache: 'no-store'
-          });
-
-          if (res.status === 404) {
-            loadingState.classList.add('hidden');
-            renderPosts();
-            return;
-          }
-
-          if (!res.ok) {
-            const errData = await res.json().catch(function () { return {}; });
-            throw new Error(errData.message || `GitHub API returned status ${res.status}`);
-          }
-
-          const items = await res.json();
-          if (!Array.isArray(items)) {
-            loadingState.classList.add('hidden');
-            renderPosts();
-            return;
-          }
-
-          const mdFiles = items.filter(function (item) {
-            return item.type === 'file' && item.name.toLowerCase().endsWith('.md') && item.download_url;
-          });
+          const mdFiles = await getMarkdownFileList(owner, repo, branch);
 
           if (mdFiles.length === 0) {
-            loadingState.classList.add('hidden');
+            allPosts = [];
+            updateTicker([]);
             renderPosts();
             return;
           }
 
           const loadedPosts = await Promise.all(
             mdFiles.map(async function (file) {
-              const fileRes = await fetch(file.download_url, { cache: 'no-store' });
-              if (!fileRes.ok) {
-                throw new Error(`Failed to fetch ${file.name}`);
-              }
-              const mdText = await fileRes.text();
-              return parseMarkdownPost(mdText, file.name);
+              try {
+                const fileRes = await fetch(file.download_url, { cache: 'no-store' });
+                if (fileRes.ok) {
+                  return parseMarkdownPost(await fileRes.text(), file.name);
+                }
+              } catch (_) { /* fallback below */ }
+              const text = await fetchMarkdownText(file.name, owner, repo, branch);
+              return parseMarkdownPost(text, file.name);
             })
           );
 
@@ -564,23 +577,35 @@
           });
 
           allPosts = loadedPosts;
+          try {
+            localStorage.setItem(CACHE_KEY, JSON.stringify(allPosts));
+          } catch (_) { /* ignore storage quota */ }
+
           updateTicker(allPosts);
           renderPosts();
         } catch (err) {
-          showError('Could not load posts from GitHub: ' + err.message);
-          renderPosts();
+          // Try cached posts from localStorage if network/CDN temporarily fails
+          let loadedFromCache = false;
+          try {
+            const cached = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null');
+            if (Array.isArray(cached) && cached.length > 0) {
+              allPosts = cached;
+              updateTicker(allPosts);
+              renderPosts();
+              loadedFromCache = true;
+            }
+          } catch (_) { /* ignore */ }
+
+          if (!loadedFromCache) {
+            allPosts = [];
+            updateTicker([]);
+            showError('Could not load posts from GitHub: ' + err.message);
+            renderPosts();
+          }
         } finally {
           loadingState.classList.add('hidden');
         }
       }
-
-      reloadBtn.addEventListener('click', fetchPublishedPosts);
-
-      [cfgOwner, cfgRepo, cfgBranch].forEach(function (input) {
-        input.addEventListener('keydown', function (e) {
-          if (e.key === 'Enter') fetchPublishedPosts();
-        });
-      });
 
       categoryBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
@@ -611,7 +636,6 @@
       });
 
       updateClock();
-      loadConfigFromLocalStorage();
       fetchPublishedPosts();
     })();
   </script>
