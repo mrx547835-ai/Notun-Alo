@@ -44,9 +44,9 @@
     <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
       <div class="flex flex-wrap items-center gap-2">
         <span class="font-semibold text-red-500 uppercase tracking-wider mr-1">GitHub Source:</span>
-        <input id="cfgOwner" type="text" placeholder="Owner (e.g. octocat)" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
-        <input id="cfgRepo" type="text" placeholder="Repo (e.g. news)" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
-        <input id="cfgBranch" type="text" placeholder="Branch" value="main" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-24" />
+        <input id="cfgOwner" type="text" value="mrx547835-ai" placeholder="Owner" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
+        <input id="cfgRepo" type="text" value="Notun-Alo" placeholder="Repo" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
+        <input id="cfgBranch" type="text" value="main" placeholder="Branch" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-24" />
         <button id="reloadBtn" type="button" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded transition cursor-pointer">
           Reload
         </button>
@@ -106,8 +106,8 @@
       </span>
       <div class="ticker-wrapper overflow-hidden flex-1 text-sm font-medium text-neutral-900">
         <div id="breakingTicker" class="ticker-track">
-          <span class="mr-12">Welcome to Daily Sylhet — Configure GitHub repository above to load live news.</span>
-          <span class="mr-12">Welcome to Daily Sylhet — Configure GitHub repository above to load live news.</span>
+          <span class="mr-12">Daily Sylhet — Loading latest news...</span>
+          <span class="mr-12">Daily Sylhet — Loading latest news...</span>
         </div>
       </div>
     </div>
@@ -115,25 +115,20 @@
 
   <!-- Main Content -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:py-8">
-    <!-- Loading State -->
     <div id="loadingState" class="hidden py-16 text-center">
       <div class="inline-block w-8 h-8 border-4 border-neutral-300 border-t-red-600 rounded-full animate-spin mb-3"></div>
       <p class="text-sm text-neutral-600 font-medium">Fetching latest editions from GitHub...</p>
     </div>
 
-    <!-- Error / Notice Banner -->
     <div id="errorBanner" class="hidden mb-6 border-l-4 border-red-600 bg-red-50 text-red-900 p-4 text-sm"></div>
 
-    <!-- Empty State -->
     <div id="emptyState" class="hidden py-20 text-center border border-dashed border-neutral-300 rounded">
       <p class="font-editorial text-2xl font-bold text-neutral-800 mb-2">No published posts yet. Publish from Admin.</p>
       <p id="emptySubtext" class="text-sm text-neutral-500">Make sure your GitHub Owner, Repo, and Branch are configured above.</p>
     </div>
 
-    <!-- Hero Featured Post -->
     <section id="heroSection" class="hidden mb-8 pb-8 border-b border-neutral-300"></section>
 
-    <!-- Posts Grid -->
     <section id="gridSection" class="hidden">
       <div class="flex items-center justify-between mb-4 border-b border-black pb-2">
         <h2 id="sectionHeading" class="font-editorial text-xl font-bold uppercase tracking-wide text-black">Latest Stories</h2>
@@ -184,6 +179,10 @@
         repo: 'ds_gh_repo',
         branch: 'ds_gh_branch'
       };
+
+      const DEFAULT_OWNER = 'mrx547835-ai';
+      const DEFAULT_REPO = 'Notun-Alo';
+      const DEFAULT_BRANCH = 'main';
 
       const cfgOwner = document.getElementById('cfgOwner');
       const cfgRepo = document.getElementById('cfgRepo');
@@ -293,7 +292,6 @@
           bodyRaw = fmMatch[2] || '';
         }
 
-        // First line after frontmatter = excerpt, rest = content
         const bodyLines = bodyRaw.split('\n');
         let firstIdx = 0;
         while (firstIdx < bodyLines.length && bodyLines[firstIdx].trim() === '') {
@@ -316,15 +314,15 @@
       }
 
       function saveConfigToLocalStorage() {
-        localStorage.setItem(LS_KEYS.owner, cfgOwner.value.trim());
-        localStorage.setItem(LS_KEYS.repo, cfgRepo.value.trim());
-        localStorage.setItem(LS_KEYS.branch, cfgBranch.value.trim() || 'main');
+        localStorage.setItem(LS_KEYS.owner, cfgOwner.value.trim() || DEFAULT_OWNER);
+        localStorage.setItem(LS_KEYS.repo, cfgRepo.value.trim() || DEFAULT_REPO);
+        localStorage.setItem(LS_KEYS.branch, cfgBranch.value.trim() || DEFAULT_BRANCH);
       }
 
       function loadConfigFromLocalStorage() {
-        cfgOwner.value = localStorage.getItem(LS_KEYS.owner) || '';
-        cfgRepo.value = localStorage.getItem(LS_KEYS.repo) || '';
-        cfgBranch.value = localStorage.getItem(LS_KEYS.branch) || 'main';
+        cfgOwner.value = localStorage.getItem(LS_KEYS.owner) || DEFAULT_OWNER;
+        cfgRepo.value = localStorage.getItem(LS_KEYS.repo) || DEFAULT_REPO;
+        cfgBranch.value = localStorage.getItem(LS_KEYS.branch) || DEFAULT_BRANCH;
       }
 
       function showError(msg) {
@@ -381,13 +379,11 @@
           return;
         }
 
-        // Restore default empty message text for future empty states
         document.querySelector('#emptyState p').textContent = 'No published posts yet. Publish from Admin.';
 
         const heroPost = filtered[0];
         const remainingPosts = filtered.slice(1);
 
-        // Render Hero Featured Post
         const heroImgHtml = heroPost.image
           ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
           : `<div class="w-full h-64 sm:h-80 lg:h-96 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Daily Sylhet</div>`;
@@ -418,7 +414,6 @@
         `;
         heroSection.classList.remove('hidden');
 
-        // Render Grid of Other Posts
         if (remainingPosts.length > 0) {
           sectionHeading.textContent = selectedCategory === 'All' ? 'More News' : selectedCategory + ' News';
           postCount.textContent = remainingPosts.length + (remainingPosts.length === 1 ? ' Article' : ' Articles');
@@ -502,22 +497,12 @@
         hideError();
         saveConfigToLocalStorage();
 
-        const owner = cfgOwner.value.trim();
-        const repo = cfgRepo.value.trim();
-        const branch = cfgBranch.value.trim() || 'main';
+        const owner = cfgOwner.value.trim() || DEFAULT_OWNER;
+        const repo = cfgRepo.value.trim() || DEFAULT_REPO;
+        const branch = cfgBranch.value.trim() || DEFAULT_BRANCH;
 
         allPosts = [];
         updateTicker([]);
-
-        if (!owner || !repo) {
-          repoStatus.textContent = 'Not configured';
-          heroSection.classList.add('hidden');
-          gridSection.classList.add('hidden');
-          emptyState.classList.remove('hidden');
-          document.querySelector('#emptyState p').textContent = 'No published posts yet. Publish from Admin.';
-          emptySubtext.textContent = 'Enter GitHub Owner and Repo in the top bar and click Reload.';
-          return;
-        }
 
         repoStatus.textContent = `${owner}/${repo} (${branch})`;
         loadingState.classList.remove('hidden');
@@ -572,7 +557,6 @@
             })
           );
 
-          // Sort newest first by ISO date
           loadedPosts.sort(function (a, b) {
             const ta = Date.parse(a.date) || 0;
             const tb = Date.parse(b.date) || 0;
@@ -590,7 +574,6 @@
         }
       }
 
-      // Event Listeners
       reloadBtn.addEventListener('click', fetchPublishedPosts);
 
       [cfgOwner, cfgRepo, cfgBranch].forEach(function (input) {
@@ -627,7 +610,6 @@
         }
       });
 
-      // Init
       updateClock();
       loadConfigFromLocalStorage();
       fetchPublishedPosts();
