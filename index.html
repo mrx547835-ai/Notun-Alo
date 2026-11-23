@@ -1,0 +1,637 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Sylhet — Truth &amp; Trust</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Noto+Serif+Bengali:wght@600;700&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+      background-color: #ffffff;
+      color: #111111;
+    }
+    .font-editorial {
+      font-family: 'Playfair Display', 'Noto Serif Bengali', Georgia, serif;
+    }
+    @keyframes ticker-scroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .ticker-track {
+      display: inline-flex;
+      white-space: nowrap;
+      animation: ticker-scroll 35s linear infinite;
+    }
+    .ticker-wrapper:hover .ticker-track {
+      animation-play-state: paused;
+    }
+    .line-clamp-3 {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body class="bg-white text-neutral-900 min-h-screen flex flex-col">
+
+  <!-- Top GitHub Config Bar -->
+  <div class="bg-neutral-950 text-neutral-200 border-b border-neutral-800 text-xs">
+    <div class="max-w-7xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2">
+      <div class="flex flex-wrap items-center gap-2">
+        <span class="font-semibold text-red-500 uppercase tracking-wider mr-1">GitHub Source:</span>
+        <input id="cfgOwner" type="text" placeholder="Owner (e.g. octocat)" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
+        <input id="cfgRepo" type="text" placeholder="Repo (e.g. news)" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-36 sm:w-40" />
+        <input id="cfgBranch" type="text" placeholder="Branch" value="main" class="bg-neutral-900 border border-neutral-700 rounded px-2 py-1 text-white placeholder-neutral-500 focus:outline-none focus:border-red-500 w-24" />
+        <button id="reloadBtn" type="button" class="bg-red-600 hover:bg-red-700 text-white font-semibold px-3 py-1 rounded transition cursor-pointer">
+          Reload
+        </button>
+      </div>
+      <div class="flex items-center gap-3">
+        <span id="repoStatus" class="text-neutral-400"></span>
+        <a href="admin.html" class="text-neutral-300 hover:text-white underline underline-offset-2">Admin Panel</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Masthead / Header -->
+  <header class="border-b-2 border-black bg-white">
+    <div class="max-w-7xl mx-auto px-4 py-4 md:py-6 flex flex-col md:flex-row items-center justify-between gap-3">
+      <div class="text-xs md:text-sm text-neutral-600 font-medium order-2 md:order-1 md:w-1/4 text-center md:text-left">
+        <div id="liveDate" class="text-neutral-900 font-semibold"></div>
+        <div class="text-neutral-500">Sylhet Edition • Online</div>
+      </div>
+
+      <div class="order-1 md:order-2 text-center">
+        <a href="index.html" class="inline-block group">
+          <h1 class="font-editorial text-4xl sm:text-5xl md:text-6xl font-black tracking-tight text-black">
+            Daily <span class="text-red-600">Sylhet</span>
+          </h1>
+          <div class="h-1 w-24 bg-red-600 mx-auto mt-1.5"></div>
+        </a>
+      </div>
+
+      <div class="order-3 md:w-1/4 flex justify-center md:justify-end w-full">
+        <div class="relative w-full max-w-xs">
+          <input id="searchInput" type="search" placeholder="Search headlines..." class="w-full border border-neutral-300 rounded-sm pl-3 pr-8 py-1.5 text-sm focus:outline-none focus:border-black" />
+          <svg class="w-4 h-4 text-neutral-500 absolute right-2.5 top-2.5 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Category Navigation -->
+    <nav class="border-t border-neutral-200 bg-white">
+      <div id="categoryBar" class="max-w-7xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-2 text-sm font-semibold">
+        <button data-category="All" class="cat-btn px-3 py-1.5 rounded-sm bg-red-600 text-white whitespace-nowrap cursor-pointer">All</button>
+        <button data-category="National" class="cat-btn px-3 py-1.5 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">National</button>
+        <button data-category="Politics" class="cat-btn px-3 py-1.5 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">Politics</button>
+        <button data-category="Sports" class="cat-btn px-3 py-1.5 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">Sports</button>
+        <button data-category="Tech" class="cat-btn px-3 py-1.5 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">Tech</button>
+        <button data-category="Entertainment" class="cat-btn px-3 py-1.5 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">Entertainment</button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Breaking News Ticker -->
+  <div class="bg-neutral-100 border-b border-neutral-300">
+    <div class="max-w-7xl mx-auto px-4 flex items-center h-9 overflow-hidden">
+      <span class="bg-red-600 text-white text-xs font-bold uppercase tracking-wider px-2.5 py-1 mr-3 shrink-0">
+        Breaking
+      </span>
+      <div class="ticker-wrapper overflow-hidden flex-1 text-sm font-medium text-neutral-900">
+        <div id="breakingTicker" class="ticker-track">
+          <span class="mr-12">Welcome to Daily Sylhet — Configure GitHub repository above to load live news.</span>
+          <span class="mr-12">Welcome to Daily Sylhet — Configure GitHub repository above to load live news.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 md:py-8">
+    <!-- Loading State -->
+    <div id="loadingState" class="hidden py-16 text-center">
+      <div class="inline-block w-8 h-8 border-4 border-neutral-300 border-t-red-600 rounded-full animate-spin mb-3"></div>
+      <p class="text-sm text-neutral-600 font-medium">Fetching latest editions from GitHub...</p>
+    </div>
+
+    <!-- Error / Notice Banner -->
+    <div id="errorBanner" class="hidden mb-6 border-l-4 border-red-600 bg-red-50 text-red-900 p-4 text-sm"></div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="hidden py-20 text-center border border-dashed border-neutral-300 rounded">
+      <p class="font-editorial text-2xl font-bold text-neutral-800 mb-2">No published posts yet. Publish from Admin.</p>
+      <p id="emptySubtext" class="text-sm text-neutral-500">Make sure your GitHub Owner, Repo, and Branch are configured above.</p>
+    </div>
+
+    <!-- Hero Featured Post -->
+    <section id="heroSection" class="hidden mb-8 pb-8 border-b border-neutral-300"></section>
+
+    <!-- Posts Grid -->
+    <section id="gridSection" class="hidden">
+      <div class="flex items-center justify-between mb-4 border-b border-black pb-2">
+        <h2 id="sectionHeading" class="font-editorial text-xl font-bold uppercase tracking-wide text-black">Latest Stories</h2>
+        <span id="postCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
+      </div>
+      <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+    </section>
+  </main>
+
+  <!-- Full Article Modal -->
+  <div id="articleModal" class="hidden fixed inset-0 z-50 bg-black/70 overflow-y-auto p-4 sm:p-6">
+    <div class="max-w-3xl mx-auto bg-white rounded-sm shadow-2xl overflow-hidden my-4">
+      <div class="sticky top-0 bg-white border-b border-neutral-200 px-6 py-3 flex items-center justify-between z-10">
+        <span id="modalCategory" class="text-xs font-bold uppercase tracking-wider text-red-600"></span>
+        <button id="closeModalBtn" type="button" class="text-neutral-600 hover:text-black font-bold text-xl leading-none px-2 py-1 cursor-pointer">&times;</button>
+      </div>
+      <article class="p-6 sm:p-8">
+        <h1 id="modalTitle" class="font-editorial text-2xl sm:text-4xl font-bold text-black leading-tight mb-3"></h1>
+        <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-5">
+          <span>By <strong id="modalAuthor" class="text-neutral-900"></strong></span>
+          <span>•</span>
+          <time id="modalDate"></time>
+        </div>
+        <div id="modalImageWrap" class="hidden mb-6">
+          <img id="modalImage" src="" alt="" class="w-full max-h-[420px] object-cover rounded-sm border border-neutral-200" />
+        </div>
+        <p id="modalExcerpt" class="text-base sm:text-lg font-semibold text-neutral-800 leading-relaxed mb-5 border-l-4 border-red-600 pl-4"></p>
+        <div id="modalBody" class="space-y-4 text-neutral-800 leading-relaxed text-base"></div>
+      </article>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
+    <div class="max-w-7xl mx-auto px-4 py-6 flex flex-col sm:flex-row items-center justify-between gap-2">
+      <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Daily Sylhet. All rights reserved.</p>
+      <p>Powered by GitHub Content API • Static Newspaper Architecture</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      'use strict';
+
+      // NOTE: Front page NEVER reads from or accesses IndexedDB. GitHub Repo is the sole source of truth.
+      const LS_KEYS = {
+        owner: 'ds_gh_owner',
+        repo: 'ds_gh_repo',
+        branch: 'ds_gh_branch'
+      };
+
+      const cfgOwner = document.getElementById('cfgOwner');
+      const cfgRepo = document.getElementById('cfgRepo');
+      const cfgBranch = document.getElementById('cfgBranch');
+      const reloadBtn = document.getElementById('reloadBtn');
+      const repoStatus = document.getElementById('repoStatus');
+
+      const liveDateEl = document.getElementById('liveDate');
+      const footerYearEl = document.getElementById('footerYear');
+      const searchInput = document.getElementById('searchInput');
+      const categoryBtns = document.querySelectorAll('.cat-btn');
+      const breakingTicker = document.getElementById('breakingTicker');
+
+      const loadingState = document.getElementById('loadingState');
+      const errorBanner = document.getElementById('errorBanner');
+      const emptyState = document.getElementById('emptyState');
+      const emptySubtext = document.getElementById('emptySubtext');
+      const heroSection = document.getElementById('heroSection');
+      const gridSection = document.getElementById('gridSection');
+      const sectionHeading = document.getElementById('sectionHeading');
+      const postCount = document.getElementById('postCount');
+      const postsGrid = document.getElementById('postsGrid');
+
+      const articleModal = document.getElementById('articleModal');
+      const closeModalBtn = document.getElementById('closeModalBtn');
+      const modalCategory = document.getElementById('modalCategory');
+      const modalTitle = document.getElementById('modalTitle');
+      const modalAuthor = document.getElementById('modalAuthor');
+      const modalDate = document.getElementById('modalDate');
+      const modalImageWrap = document.getElementById('modalImageWrap');
+      const modalImage = document.getElementById('modalImage');
+      const modalExcerpt = document.getElementById('modalExcerpt');
+      const modalBody = document.getElementById('modalBody');
+
+      let allPosts = [];
+      let selectedCategory = 'All';
+      let searchQuery = '';
+
+      function updateClock() {
+        const now = new Date();
+        liveDateEl.textContent = now.toLocaleDateString('en-US', {
+          weekday: 'long',
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        footerYearEl.textContent = String(now.getFullYear());
+      }
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function sanitizeImageUrl(url) {
+        const trimmed = String(url || '').trim();
+        if (!trimmed) return '';
+        if (/^(https?:\/\/|data:image\/)/i.test(trimmed)) {
+          return trimmed;
+        }
+        return '';
+      }
+
+      function formatDate(isoStr) {
+        if (!isoStr) return 'Recent';
+        const d = new Date(isoStr);
+        if (isNaN(d.getTime())) return isoStr;
+        return d.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        });
+      }
+
+      function parseMarkdownPost(raw, filename) {
+        const normalized = String(raw || '').replace(/\r\n/g, '\n');
+        const fmMatch = normalized.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+
+        const meta = {
+          title: filename.replace(/\.md$/i, ''),
+          date: '',
+          category: 'National',
+          author: 'Staff Correspondent',
+          image: ''
+        };
+
+        let bodyRaw = normalized;
+
+        if (fmMatch) {
+          const fmLines = fmMatch[1].split('\n');
+          fmLines.forEach(function (line) {
+            const colonIdx = line.indexOf(':');
+            if (colonIdx === -1) return;
+            const key = line.slice(0, colonIdx).trim().toLowerCase();
+            let val = line.slice(colonIdx + 1).trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'");
+            }
+            if (key in meta) {
+              meta[key] = val;
+            }
+          });
+          bodyRaw = fmMatch[2] || '';
+        }
+
+        // First line after frontmatter = excerpt, rest = content
+        const bodyLines = bodyRaw.split('\n');
+        let firstIdx = 0;
+        while (firstIdx < bodyLines.length && bodyLines[firstIdx].trim() === '') {
+          firstIdx++;
+        }
+
+        const excerpt = firstIdx < bodyLines.length ? bodyLines[firstIdx].trim() : '';
+        const content = bodyLines.slice(firstIdx + 1).join('\n').trim();
+
+        return {
+          filename: filename,
+          title: meta.title || 'Untitled',
+          date: meta.date || '',
+          category: meta.category || 'National',
+          author: meta.author || 'Staff Correspondent',
+          image: sanitizeImageUrl(meta.image),
+          excerpt: excerpt,
+          content: content
+        };
+      }
+
+      function saveConfigToLocalStorage() {
+        localStorage.setItem(LS_KEYS.owner, cfgOwner.value.trim());
+        localStorage.setItem(LS_KEYS.repo, cfgRepo.value.trim());
+        localStorage.setItem(LS_KEYS.branch, cfgBranch.value.trim() || 'main');
+      }
+
+      function loadConfigFromLocalStorage() {
+        cfgOwner.value = localStorage.getItem(LS_KEYS.owner) || '';
+        cfgRepo.value = localStorage.getItem(LS_KEYS.repo) || '';
+        cfgBranch.value = localStorage.getItem(LS_KEYS.branch) || 'main';
+      }
+
+      function showError(msg) {
+        errorBanner.textContent = msg;
+        errorBanner.classList.remove('hidden');
+      }
+
+      function hideError() {
+        errorBanner.classList.add('hidden');
+        errorBanner.textContent = '';
+      }
+
+      function updateTicker(posts) {
+        if (!posts.length) {
+          const fallback = 'Daily Sylhet — No published posts yet. Publish from Admin.';
+          breakingTicker.innerHTML = `<span class="mr-12">${escapeHtml(fallback)}</span><span class="mr-12">${escapeHtml(fallback)}</span>`;
+          return;
+        }
+        const headlines = posts.slice(0, 6).map(function (p) {
+          return `<button type="button" data-filename="${escapeHtml(p.filename)}" class="ticker-item hover:text-red-600 mr-10 cursor-pointer"><span class="text-red-600 font-bold mr-1.5">&#9632;</span>${escapeHtml(p.title)}</button>`;
+        }).join('');
+        breakingTicker.innerHTML = headlines + headlines;
+
+        breakingTicker.querySelectorAll('.ticker-item').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            const fname = btn.getAttribute('data-filename');
+            const found = allPosts.find(function (p) { return p.filename === fname; });
+            if (found) openArticleModal(found);
+          });
+        });
+      }
+
+      function renderPosts() {
+        const filtered = allPosts.filter(function (post) {
+          const matchesCat = selectedCategory === 'All' || post.category.toLowerCase() === selectedCategory.toLowerCase();
+          const matchesSearch = !searchQuery || post.title.toLowerCase().includes(searchQuery.toLowerCase());
+          return matchesCat && matchesSearch;
+        });
+
+        heroSection.classList.add('hidden');
+        gridSection.classList.add('hidden');
+        emptyState.classList.add('hidden');
+
+        if (allPosts.length === 0) {
+          emptyState.classList.remove('hidden');
+          emptySubtext.textContent = 'Publish a post from admin.html or verify your GitHub repo settings above.';
+          return;
+        }
+
+        if (filtered.length === 0) {
+          emptyState.classList.remove('hidden');
+          document.querySelector('#emptyState p').textContent = 'No matching articles found.';
+          emptySubtext.textContent = 'Try clearing your search or choosing another category.';
+          return;
+        }
+
+        // Restore default empty message text for future empty states
+        document.querySelector('#emptyState p').textContent = 'No published posts yet. Publish from Admin.';
+
+        const heroPost = filtered[0];
+        const remainingPosts = filtered.slice(1);
+
+        // Render Hero Featured Post
+        const heroImgHtml = heroPost.image
+          ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 lg:h-96 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
+          : `<div class="w-full h-64 sm:h-80 lg:h-96 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Daily Sylhet</div>`;
+
+        heroSection.innerHTML = `
+          <article data-filename="${escapeHtml(heroPost.filename)}" class="article-card group grid grid-cols-1 lg:grid-cols-12 gap-6 items-center cursor-pointer">
+            <div class="lg:col-span-7 overflow-hidden">
+              ${heroImgHtml}
+            </div>
+            <div class="lg:col-span-5 flex flex-col justify-center">
+              <div class="flex items-center gap-2 mb-2.5">
+                <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5">${escapeHtml(heroPost.category)}</span>
+                <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Featured</span>
+              </div>
+              <h2 class="font-editorial text-2xl sm:text-3xl lg:text-4xl font-bold text-black group-hover:text-red-600 transition leading-tight mb-3">
+                ${escapeHtml(heroPost.title)}
+              </h2>
+              <p class="text-neutral-700 text-sm sm:text-base leading-relaxed mb-4 line-clamp-3">
+                ${escapeHtml(heroPost.excerpt || heroPost.content.slice(0, 180))}
+              </p>
+              <div class="text-xs text-neutral-500 font-medium flex items-center gap-2">
+                <span class="text-neutral-800 font-semibold">${escapeHtml(heroPost.author)}</span>
+                <span>•</span>
+                <span>${escapeHtml(formatDate(heroPost.date))}</span>
+              </div>
+            </div>
+          </article>
+        `;
+        heroSection.classList.remove('hidden');
+
+        // Render Grid of Other Posts
+        if (remainingPosts.length > 0) {
+          sectionHeading.textContent = selectedCategory === 'All' ? 'More News' : selectedCategory + ' News';
+          postCount.textContent = remainingPosts.length + (remainingPosts.length === 1 ? ' Article' : ' Articles');
+
+          postsGrid.innerHTML = remainingPosts.map(function (post) {
+            const imgHtml = post.image
+              ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" class="w-full h-48 object-cover rounded-sm border border-neutral-200 mb-3" onerror="this.style.display='none'" />`
+              : `<div class="w-full h-48 bg-neutral-100 border border-neutral-200 rounded-sm mb-3 flex items-center justify-center text-neutral-400 font-editorial text-lg">Daily Sylhet</div>`;
+
+            return `
+              <article data-filename="${escapeHtml(post.filename)}" class="article-card group border-b border-neutral-200 pb-5 flex flex-col cursor-pointer">
+                ${imgHtml}
+                <div class="flex items-center gap-2 mb-1.5">
+                  <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">${escapeHtml(post.category)}</span>
+                  <span class="text-neutral-300">•</span>
+                  <span class="text-xs text-neutral-500">${escapeHtml(formatDate(post.date))}</span>
+                </div>
+                <h3 class="font-editorial text-xl font-bold text-black group-hover:text-red-600 transition leading-snug mb-2">
+                  ${escapeHtml(post.title)}
+                </h3>
+                <p class="text-sm text-neutral-600 line-clamp-3 mb-3 flex-1">
+                  ${escapeHtml(post.excerpt || post.content.slice(0, 140))}
+                </p>
+                <div class="text-xs text-neutral-500 font-medium">By <span class="text-neutral-800">${escapeHtml(post.author)}</span></div>
+              </article>
+            `;
+          }).join('');
+          gridSection.classList.remove('hidden');
+        }
+
+        document.querySelectorAll('.article-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            const fname = card.getAttribute('data-filename');
+            const found = allPosts.find(function (p) { return p.filename === fname; });
+            if (found) openArticleModal(found);
+          });
+        });
+      }
+
+      function openArticleModal(post) {
+        modalCategory.textContent = post.category;
+        modalTitle.textContent = post.title;
+        modalAuthor.textContent = post.author;
+        modalDate.textContent = formatDate(post.date);
+
+        if (post.image) {
+          modalImage.src = post.image;
+          modalImage.alt = post.title;
+          modalImageWrap.classList.remove('hidden');
+        } else {
+          modalImageWrap.classList.add('hidden');
+          modalImage.src = '';
+        }
+
+        if (post.excerpt) {
+          modalExcerpt.textContent = post.excerpt;
+          modalExcerpt.classList.remove('hidden');
+        } else {
+          modalExcerpt.classList.add('hidden');
+        }
+
+        const paragraphs = (post.content || '').split(/\n\s*\n/).filter(function (p) { return p.trim() !== ''; });
+        if (paragraphs.length === 0 && !post.excerpt) {
+          modalBody.innerHTML = '<p class="text-neutral-500 italic">No additional content.</p>';
+        } else {
+          modalBody.innerHTML = paragraphs.map(function (para) {
+            return `<p class="whitespace-pre-line">${escapeHtml(para.trim())}</p>`;
+          }).join('');
+        }
+
+        articleModal.classList.remove('hidden');
+        document.body.classList.add('overflow-hidden');
+      }
+
+      function closeArticleModal() {
+        articleModal.classList.add('hidden');
+        document.body.classList.remove('overflow-hidden');
+      }
+
+      async function fetchPublishedPosts() {
+        hideError();
+        saveConfigToLocalStorage();
+
+        const owner = cfgOwner.value.trim();
+        const repo = cfgRepo.value.trim();
+        const branch = cfgBranch.value.trim() || 'main';
+
+        allPosts = [];
+        updateTicker([]);
+
+        if (!owner || !repo) {
+          repoStatus.textContent = 'Not configured';
+          heroSection.classList.add('hidden');
+          gridSection.classList.add('hidden');
+          emptyState.classList.remove('hidden');
+          document.querySelector('#emptyState p').textContent = 'No published posts yet. Publish from Admin.';
+          emptySubtext.textContent = 'Enter GitHub Owner and Repo in the top bar and click Reload.';
+          return;
+        }
+
+        repoStatus.textContent = `${owner}/${repo} (${branch})`;
+        loadingState.classList.remove('hidden');
+        emptyState.classList.add('hidden');
+        heroSection.classList.add('hidden');
+        gridSection.classList.add('hidden');
+
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
+
+        try {
+          const res = await fetch(apiUrl, {
+            headers: { 'Accept': 'application/vnd.github+json' },
+            cache: 'no-store'
+          });
+
+          if (res.status === 404) {
+            loadingState.classList.add('hidden');
+            renderPosts();
+            return;
+          }
+
+          if (!res.ok) {
+            const errData = await res.json().catch(function () { return {}; });
+            throw new Error(errData.message || `GitHub API returned status ${res.status}`);
+          }
+
+          const items = await res.json();
+          if (!Array.isArray(items)) {
+            loadingState.classList.add('hidden');
+            renderPosts();
+            return;
+          }
+
+          const mdFiles = items.filter(function (item) {
+            return item.type === 'file' && item.name.toLowerCase().endsWith('.md') && item.download_url;
+          });
+
+          if (mdFiles.length === 0) {
+            loadingState.classList.add('hidden');
+            renderPosts();
+            return;
+          }
+
+          const loadedPosts = await Promise.all(
+            mdFiles.map(async function (file) {
+              const fileRes = await fetch(file.download_url, { cache: 'no-store' });
+              if (!fileRes.ok) {
+                throw new Error(`Failed to fetch ${file.name}`);
+              }
+              const mdText = await fileRes.text();
+              return parseMarkdownPost(mdText, file.name);
+            })
+          );
+
+          // Sort newest first by ISO date
+          loadedPosts.sort(function (a, b) {
+            const ta = Date.parse(a.date) || 0;
+            const tb = Date.parse(b.date) || 0;
+            return tb - ta;
+          });
+
+          allPosts = loadedPosts;
+          updateTicker(allPosts);
+          renderPosts();
+        } catch (err) {
+          showError('Could not load posts from GitHub: ' + err.message);
+          renderPosts();
+        } finally {
+          loadingState.classList.add('hidden');
+        }
+      }
+
+      // Event Listeners
+      reloadBtn.addEventListener('click', fetchPublishedPosts);
+
+      [cfgOwner, cfgRepo, cfgBranch].forEach(function (input) {
+        input.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter') fetchPublishedPosts();
+        });
+      });
+
+      categoryBtns.forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          selectedCategory = btn.getAttribute('data-category');
+          categoryBtns.forEach(function (b) {
+            b.classList.remove('bg-red-600', 'text-white');
+            b.classList.add('text-neutral-800', 'hover:bg-neutral-100');
+          });
+          btn.classList.add('bg-red-600', 'text-white');
+          btn.classList.remove('text-neutral-800', 'hover:bg-neutral-100');
+          renderPosts();
+        });
+      });
+
+      searchInput.addEventListener('input', function () {
+        searchQuery = searchInput.value.trim();
+        renderPosts();
+      });
+
+      closeModalBtn.addEventListener('click', closeArticleModal);
+      articleModal.addEventListener('click', function (e) {
+        if (e.target === articleModal) closeArticleModal();
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && !articleModal.classList.contains('hidden')) {
+          closeArticleModal();
+        }
+      });
+
+      // Init
+      updateClock();
+      loadConfigFromLocalStorage();
+      fetchPublishedPosts();
+    })();
+  </script>
+</body>
+</html>
