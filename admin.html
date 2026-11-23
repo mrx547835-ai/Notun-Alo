@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Daily Sylhet — Admin Panel</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Bengali:wght@400;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    body {
+      font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    }
+    .font-editorial {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+  </style>
+</head>
+<body class="bg-neutral-100 text-neutral-900 min-h-screen">
+
+  <!-- Login Screen -->
+  <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-md bg-white border border-neutral-200 rounded-sm shadow-sm p-8">
+      <div class="text-center mb-6">
+        <h1 class="font-editorial text-3xl font-bold text-black">
+          Daily <span class="text-red-600">Sylhet</span>
+        </h1>
+        <p class="text-xs uppercase tracking-widest text-neutral-500 mt-1 font-semibold">Editorial Admin Desk</p>
+      </div>
+
+      <form id="loginForm" class="space-y-4">
+        <div>
+          <label for="loginUser" class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 mb-1">Username</label>
+          <input id="loginUser" type="text" required autocomplete="username" placeholder="admin" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+        </div>
+        <div>
+          <label for="loginPass" class="block text-xs font-semibold uppercase tracking-wider text-neutral-700 mb-1">Password</label>
+          <input id="loginPass" type="password" required autocomplete="current-password" placeholder="••••" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+        </div>
+        <div id="loginError" class="hidden text-xs text-red-600 font-semibold">Invalid credentials.</div>
+        <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 rounded-sm text-sm transition cursor-pointer">
+          Sign In
+        </button>
+      </form>
+      <div class="mt-6 text-center">
+        <a href="index.html" class="text-xs text-neutral-500 hover:text-black underline">&larr; Back to Newspaper Front Page</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard -->
+  <div id="adminView" class="hidden min-h-screen flex flex-col">
+    <!-- Top Header -->
+    <header class="bg-black text-white border-b-2 border-red-600">
+      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="font-editorial text-2xl font-bold">Daily <span class="text-red-500">Sylhet</span></span>
+          <span class="text-xs bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded uppercase tracking-wider">Admin Draft Desk</span>
+        </div>
+        <div class="flex items-center gap-4 text-sm">
+          <a href="index.html" target="_blank" class="text-neutral-300 hover:text-white underline underline-offset-2 text-xs sm:text-sm">View Front Page</a>
+          <button id="logoutBtn" type="button" class="bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold px-3 py-1.5 rounded-sm cursor-pointer">Logout</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+
+      <!-- Global Status Alert -->
+      <div id="statusBox" class="hidden p-4 rounded-sm border text-sm"></div>
+
+      <!-- GitHub Settings Section -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900">GitHub Publish Settings</h2>
+          <span class="text-xs text-neutral-500">Saved locally in browser (token is never hardcoded)</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
+          <div>
+            <label for="ghToken" class="block text-xs font-semibold text-neutral-700 mb-1">Personal Access Token</label>
+            <input id="ghToken" type="password" placeholder="ghp_..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <label for="ghOwner" class="block text-xs font-semibold text-neutral-700 mb-1">GitHub Owner</label>
+            <input id="ghOwner" type="text" placeholder="username or org" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <label for="ghRepo" class="block text-xs font-semibold text-neutral-700 mb-1">Repository Name</label>
+            <input id="ghRepo" type="text" placeholder="daily-sylhet-posts" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <label for="ghBranch" class="block text-xs font-semibold text-neutral-700 mb-1">Branch</label>
+            <input id="ghBranch" type="text" value="main" placeholder="main" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+          </div>
+          <div>
+            <button id="saveGhBtn" type="button" class="w-full bg-neutral-900 hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-sm transition cursor-pointer">
+              Save GitHub Settings
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Post Composer (IndexedDB Drafts) -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
+          <h2 id="formHeading" class="text-sm font-bold uppercase tracking-wider text-neutral-900">Write New Draft</h2>
+          <button id="cancelEditBtn" type="button" class="hidden text-xs text-red-600 hover:underline font-semibold cursor-pointer">Cancel Edit (New Draft)</button>
+        </div>
+
+        <form id="postForm" class="space-y-4">
+          <input id="draftId" type="hidden" value="" />
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="md:col-span-2">
+              <label for="postTitle" class="block text-xs font-semibold text-neutral-700 mb-1">Headline / Title *</label>
+              <input id="postTitle" type="text" required placeholder="Enter news headline..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            </div>
+            <div>
+              <label for="postCategory" class="block text-xs font-semibold text-neutral-700 mb-1">Category *</label>
+              <select id="postCategory" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm bg-white focus:outline-none focus:border-black">
+                <option value="National">National</option>
+                <option value="Politics">Politics</option>
+                <option value="Sports">Sports</option>
+                <option value="Tech">Tech</option>
+                <option value="Entertainment">Entertainment</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label for="postAuthor" class="block text-xs font-semibold text-neutral-700 mb-1">Author</label>
+              <input id="postAuthor" type="text" placeholder="Staff Correspondent" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            </div>
+            <div>
+              <label for="postImage" class="block text-xs font-semibold text-neutral-700 mb-1">Image URL</label>
+              <input id="postImage" type="url" placeholder="https://example.com/photo.jpg" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            </div>
+          </div>
+
+          <div>
+            <label for="postExcerpt" class="block text-xs font-semibold text-neutral-700 mb-1">Excerpt (First line summary) *</label>
+            <input id="postExcerpt" type="text" required placeholder="Short one-line summary of the story..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+          </div>
+
+          <div>
+            <label for="postContent" class="block text-xs font-semibold text-neutral-700 mb-1">Article Content *</label>
+            <textarea id="postContent" rows="8" required placeholder="Write the full article body here (supports English & বাংলা)..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black"></textarea>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-sm transition cursor-pointer">
+              Save Draft
+            </button>
+            <span class="text-xs text-neutral-500">Drafts are stored only in IndexedDB and never appear on the front page until published.</span>
+          </div>
+        </form>
+      </section>
+
+      <!-- Draft List Table (IndexedDB ONLY) -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900">Saved Drafts (IndexedDB)</h2>
+          <span id="draftCount" class="text-xs font-semibold text-neutral-500">0 drafts</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-neutral-300 bg-neutral-50 text-xs uppercase text-neutral-600">
+                <th class="py-2.5 px-3">Title</th>
+                <th class="py-2.5 px-3">Category</th>
+                <th class="py-2.5 px-3">Author</th>
+                <th class="py-2.5 px-3">Saved Date</th>
+                <th class="py-2.5 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="draftTableBody" class="divide-y divide-neutral-200"></tbody>
+          </table>
+        </div>
+        <div id="noDraftsMsg" class="hidden py-8 text-center text-sm text-neutral-500">
+          No drafts in IndexedDB yet. Write a post above and click "Save Draft".
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      const AUTH_KEY = 'ds_admin_auth';
+      const GH_KEYS = {
+        token: 'ds_gh_token',
+        owner: 'ds_gh_owner',
+        repo: 'ds_gh_repo',
+        branch: 'ds_gh_branch'
+      };
+
+      const DB_NAME = 'NewspaperDB';
+      const DB_VERSION = 1;
+      const STORE_NAME = 'posts';
+
+      const loginView = document.getElementById('loginView');
+      const adminView = document.getElementById('adminView');
+      const loginForm = document.getElementById('loginForm');
+      const loginUser = document.getElementById('loginUser');
+      const loginPass = document.getElementById('loginPass');
+      const loginError = document.getElementById('loginError');
+      const logoutBtn = document.getElementById('logoutBtn');
+
+      const statusBox = document.getElementById('statusBox');
+      const ghToken = document.getElementById('ghToken');
+      const ghOwner = document.getElementById('ghOwner');
+      const ghRepo = document.getElementById('ghRepo');
+      const ghBranch = document.getElementById('ghBranch');
+      const saveGhBtn = document.getElementById('saveGhBtn');
+
+      const postForm = document.getElementById('postForm');
+      const formHeading = document.getElementById('formHeading');
+      const cancelEditBtn = document.getElementById('cancelEditBtn');
+      const draftIdInput = document.getElementById('draftId');
+      const postTitle = document.getElementById('postTitle');
+      const postCategory = document.getElementById('postCategory');
+      const postAuthor = document.getElementById('postAuthor');
+      const postImage = document.getElementById('postImage');
+      const postExcerpt = document.getElementById('postExcerpt');
+      const postContent = document.getElementById('postContent');
+
+      const draftTableBody = document.getElementById('draftTableBody');
+      const noDraftsMsg = document.getElementById('noDraftsMsg');
+      const draftCount = document.getElementById('draftCount');
+
+      function escapeHtml(str) {
+        return String(str || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function showStatus(htmlMsg, type) {
+        statusBox.className = 'p-4 rounded-sm border text-sm';
+        if (type === 'error') {
+          statusBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
+        } else if (type === 'info') {
+          statusBox.classList.add('bg-neutral-50', 'border-neutral-300', 'text-neutral-900');
+        } else {
+          statusBox.classList.add('bg-emerald-50', 'border-emerald-300', 'text-emerald-900');
+        }
+        statusBox.innerHTML = htmlMsg;
+        statusBox.classList.remove('hidden');
+      }
+
+      // IndexedDB Helpers
+      function openDB() {
+        return new Promise(function (resolve, reject) {
+          const req = indexedDB.open(DB_NAME, DB_VERSION);
+          req.onupgradeneeded = function (e) {
+            const db = e.target.result;
+            if (!db.objectStoreNames.contains(STORE_NAME)) {
+              db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+            }
+          };
+          req.onsuccess = function (e) {
+            resolve(e.target.result);
+          };
+          req.onerror = function () {
+            reject(req.error || new Error('Failed to open IndexedDB'));
+          };
+        });
+      }
+
+      async function getAllDrafts() {
+        const db = await openDB();
+        return new Promise(function (resolve, reject) {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.getAll();
+          req.onsuccess = function () { resolve(req.result || []); };
+          req.onerror = function () { reject(req.error); };
+        });
+      }
+
+      async function saveDraftToDB(draftObj) {
+        const db = await openDB();
+        return new Promise(function (resolve, reject) {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.put(draftObj);
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error); };
+        });
+      }
+
+      async function getDraftById(id) {
+        const db = await openDB();
+        return new Promise(function (resolve, reject) {
+          const tx = db.transaction(STORE_NAME, 'readonly');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.get(id);
+          req.onsuccess = function () { resolve(req.result); };
+          req.onerror = function () { reject(req.error); };
+        });
+      }
+
+      async function deleteDraftFromDB(id) {
+        const db = await openDB();
+        return new Promise(function (resolve, reject) {
+          const tx = db.transaction(STORE_NAME, 'readwrite');
+          const store = tx.objectStore(STORE_NAME);
+          const req = store.delete(id);
+          req.onsuccess = function () { resolve(); };
+          req.onerror = function () { reject(req.error); };
+        });
+      }
+
+      // Auth Handling
+      function checkAuth() {
+        const isLoggedIn = sessionStorage.getItem(AUTH_KEY) === 'true';
+        if (isLoggedIn) {
+          loginView.classList.add('hidden');
+          adminView.classList.remove('hidden');
+          loadGitHubSettings();
+          renderDrafts();
+        } else {
+          adminView.classList.add('hidden');
+          loginView.classList.remove('hidden');
+        }
+      }
+
+      loginForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        const u = loginUser.value.trim();
+        const p = loginPass.value;
+        if (u === 'admin' && p === '1234') {
+          sessionStorage.setItem(AUTH_KEY, 'true');
+          loginError.classList.add('hidden');
+          loginForm.reset();
+          checkAuth();
+        } else {
+          loginError.classList.remove('hidden');
+        }
+      });
+
+      logoutBtn.addEventListener('click', function () {
+        sessionStorage.removeItem(AUTH_KEY);
+        checkAuth();
+      });
+
+      // GitHub Settings
+      function loadGitHubSettings() {
+        ghToken.value = localStorage.getItem(GH_KEYS.token) || '';
+        ghOwner.value = localStorage.getItem(GH_KEYS.owner) || '';
+        ghRepo.value = localStorage.getItem(GH_KEYS.repo) || '';
+        ghBranch.value = localStorage.getItem(GH_KEYS.branch) || 'main';
+      }
+
+      saveGhBtn.addEventListener('click', function () {
+        localStorage.setItem(GH_KEYS.token, ghToken.value.trim());
+        localStorage.setItem(GH_KEYS.owner, ghOwner.value.trim());
+        localStorage.setItem(GH_KEYS.repo, ghRepo.value.trim());
+        localStorage.setItem(GH_KEYS.branch, ghBranch.value.trim() || 'main');
+        showStatus('GitHub settings saved to localStorage.', 'success');
+      });
+
+      // Draft Form Handling
+      function resetForm() {
+        draftIdInput.value = '';
+        postForm.reset();
+        postCategory.value = 'National';
+        formHeading.textContent = 'Write New Draft';
+        cancelEditBtn.classList.add('hidden');
+      }
+
+      cancelEditBtn.addEventListener('click', resetForm);
+
+      postForm.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        const existingId = draftIdInput.value ? Number(draftIdInput.value) : null;
+
+        const draft = {
+          title: postTitle.value.trim(),
+          category: postCategory.value,
+          excerpt: postExcerpt.value.replace(/\r?\n/g, ' ').trim(),
+          content: postContent.value.trim(),
+          image: postImage.value.trim(),
+          author: postAuthor.value.trim() || 'Staff Correspondent',
+          date: new Date().toISOString()
+        };
+
+        if (existingId) {
+          draft.id = existingId;
+        }
+
+        try {
+          await saveDraftToDB(draft);
+          resetForm();
+          await renderDrafts();
+          showStatus(existingId ? 'Draft updated in IndexedDB.' : 'Draft saved to IndexedDB.', 'success');
+        } catch (err) {
+          showStatus('Failed to save draft: ' + escapeHtml(err.message), 'error');
+        }
+      });
+
+      // Slugify + Markdown Generation
+      function slugify(title, fallbackId) {
+        const asciiSlug = String(title || '')
+          .toLowerCase()
+          .trim()
+          .replace(/[^\w\s-]/g, '')
+          .replace(/[\s_]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+        return asciiSlug || ('post-' + (fallbackId || Date.now()));
+      }
+
+      function escapeYamlString(val) {
+        return String(val || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, ' ');
+      }
+
+      function draftToMarkdown(draft) {
+        const singleLineExcerpt = String(draft.excerpt || '').replace(/\r?\n/g, ' ').trim();
+        return [
+          '---',
+          `title: "${escapeYamlString(draft.title)}"`,
+          `date: ${draft.date || new Date().toISOString()}`,
+          `category: ${draft.category || 'National'}`,
+          `author: "${escapeYamlString(draft.author || 'Staff Correspondent')}"`,
+          `image: "${escapeYamlString(draft.image || '')}"`,
+          '---',
+          singleLineExcerpt,
+          '',
+          draft.content || ''
+        ].join('\n');
+      }
+
+      // Publish to GitHub REST API
+      async function publishDraft(draft) {
+        const token = ghToken.value.trim() || localStorage.getItem(GH_KEYS.token) || '';
+        const owner = ghOwner.value.trim() || localStorage.getItem(GH_KEYS.owner) || '';
+        const repo = ghRepo.value.trim() || localStorage.getItem(GH_KEYS.repo) || '';
+        const branch = (ghBranch.value.trim() || localStorage.getItem(GH_KEYS.branch) || 'main');
+
+        if (!token || !owner || !repo) {
+          showStatus('Please enter GitHub Token, Owner, and Repo in GitHub Publish Settings before publishing.', 'error');
+          return;
+        }
+
+        const slug = slugify(draft.title, draft.id);
+        const filePath = `posts/${slug}.md`;
+        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
+
+        showStatus(`Publishing <strong>${escapeHtml(filePath)}</strong> to GitHub...`, 'info');
+
+        try {
+          // Step 1: GET file to check if it already exists and obtain SHA
+          let existingSha = null;
+          const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github+json'
+            }
+          });
+
+          if (getRes.ok) {
+            const existingData = await getRes.json();
+            if (existingData && existingData.sha) {
+              existingSha = existingData.sha;
+            }
+          } else if (getRes.status !== 404) {
+            const errJson = await getRes.json().catch(function () { return {}; });
+            throw new Error(errJson.message || `GitHub GET error (${getRes.status})`);
+          }
+
+          // Step 2: Convert draft to Markdown and base64 encode (Bangla/Unicode safe)
+          const md = draftToMarkdown({
+            title: draft.title,
+            date: new Date().toISOString(),
+            category: draft.category,
+            author: draft.author,
+            image: draft.image,
+            excerpt: draft.excerpt,
+            content: draft.content
+          });
+          const base64Content = btoa(unescape(encodeURIComponent(md)));
+
+          const putPayload = {
+            message: `${existingSha ? 'Update' : 'Publish'} post: ${draft.title}`,
+            content: base64Content,
+            branch: branch
+          };
+          if (existingSha) {
+            putPayload.sha = existingSha;
+          }
+
+          // Step 3: PUT to GitHub
+          const putRes = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(putPayload)
+          });
+
+          const putData = await putRes.json().catch(function () { return {}; });
+          if (!putRes.ok) {
+            throw new Error(putData.message || `GitHub PUT error (${putRes.status})`);
+          }
+
+          const fileUrl = (putData.content && putData.content.html_url)
+            ? putData.content.html_url
+            : `https://github.com/${owner}/${repo}/blob/${branch}/${filePath}`;
+
+          showStatus(
+            `Published successfully! File URL: <a href="${escapeHtml(fileUrl)}" target="_blank" class="underline font-semibold break-all">${escapeHtml(fileUrl)}</a>`,
+            'success'
+          );
+
+          // Step 4: Ask to delete draft after rendering success message
+          setTimeout(async function () {
+            if (confirm('Delete draft?')) {
+              await deleteDraftFromDB(draft.id);
+              if (Number(draftIdInput.value) === draft.id) {
+                resetForm();
+              }
+              await renderDrafts();
+            }
+          }, 50);
+        } catch (err) {
+          showStatus('GitHub Publish Error: ' + escapeHtml(err.message), 'error');
+        }
+      }
+
+      // Render Drafts Table
+      async function renderDrafts() {
+        try {
+          const drafts = await getAllDrafts();
+          drafts.sort(function (a, b) {
+            return (b.id || 0) - (a.id || 0);
+          });
+
+          draftCount.textContent = drafts.length + (drafts.length === 1 ? ' draft' : ' drafts');
+
+          if (drafts.length === 0) {
+            draftTableBody.innerHTML = '';
+            noDraftsMsg.classList.remove('hidden');
+            return;
+          }
+
+          noDraftsMsg.classList.add('hidden');
+          draftTableBody.innerHTML = drafts.map(function (d) {
+            const dateDisplay = d.date ? new Date(d.date).toLocaleString() : '—';
+            return `
+              <tr class="hover:bg-neutral-50">
+                <td class="py-3 px-3 font-semibold text-neutral-900">${escapeHtml(d.title)}</td>
+                <td class="py-3 px-3">
+                  <span class="text-xs font-bold uppercase text-red-600 bg-red-50 px-2 py-0.5 rounded-sm">${escapeHtml(d.category)}</span>
+                </td>
+                <td class="py-3 px-3 text-neutral-700">${escapeHtml(d.author || 'Staff Correspondent')}</td>
+                <td class="py-3 px-3 text-xs text-neutral-500 whitespace-nowrap">${escapeHtml(dateDisplay)}</td>
+                <td class="py-3 px-3 text-right whitespace-nowrap space-x-1.5">
+                  <button type="button" data-action="edit" data-id="${d.id}" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-900 text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Edit</button>
+                  <button type="button" data-action="publish" data-id="${d.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Publish to GitHub</button>
+                  <button type="button" data-action="delete" data-id="${d.id}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Delete</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        } catch (err) {
+          showStatus('Failed to load drafts from IndexedDB: ' + escapeHtml(err.message), 'error');
+        }
+      }
+
+      // Table Action Delegation
+      draftTableBody.addEventListener('click', async function (e) {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+
+        const action = btn.getAttribute('data-action');
+        const id = Number(btn.getAttribute('data-id'));
+        const draft = await getDraftById(id);
+        if (!draft) {
+          showStatus('Draft not found.', 'error');
+          return;
+        }
+
+        if (action === 'edit') {
+          draftIdInput.value = String(draft.id);
+          postTitle.value = draft.title || '';
+          postCategory.value = draft.category || 'National';
+          postAuthor.value = draft.author || '';
+          postImage.value = draft.image || '';
+          postExcerpt.value = draft.excerpt || '';
+          postContent.value = draft.content || '';
+          formHeading.textContent = 'Edit Draft #' + draft.id;
+          cancelEditBtn.classList.remove('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else if (action === 'publish') {
+          btn.disabled = true;
+          btn.textContent = 'Publishing...';
+          try {
+            await publishDraft(draft);
+          } finally {
+            btn.disabled = false;
+            btn.textContent = 'Publish to GitHub';
+          }
+        } else if (action === 'delete') {
+          if (confirm(`Delete draft "${draft.title}"?`)) {
+            await deleteDraftFromDB(id);
+            if (Number(draftIdInput.value) === id) {
+              resetForm();
+            }
+            await renderDrafts();
+            showStatus('Draft deleted from IndexedDB.', 'info');
+          }
+        }
+      });
+
+      // Init
+      checkAuth();
+    })();
+  </script>
+</body>
+</html>
