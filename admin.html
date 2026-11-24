@@ -77,7 +77,7 @@
           <div>
             <label for="ghToken" class="block text-xs font-semibold text-neutral-700 mb-1">Personal Access Token</label>
             <div class="relative">
-              <input id="ghToken" type="text" placeholder="GitHub PAT..." class="w-full border border-neutral-300 rounded-sm pl-3 pr-12 py-2 text-sm focus:outline-none focus:border-black" value="github_pat_11CQVXY5I08Ld2CTrD9aOE_XczWNjK83O9Y9UnEcnMGw****cKrAP8yPZh6eshbd6SXPQjKWELLNB4VWqs43QL" />
+              <input id="ghToken" type="password" placeholder="GitHub PAT..." class="w-full border border-neutral-300 rounded-sm pl-3 pr-12 py-2 text-sm focus:outline-none focus:border-black" value="" />
               <button id="toggleTokenBtn" type="button" class="absolute right-2 top-2 text-[11px] font-semibold text-neutral-500 hover:text-black cursor-pointer">Show</button>
             </div>
           </div>
@@ -101,7 +101,7 @@
         </div>
       </section>
 
-      <!-- Post Composer -->
+      <!-- Post Composer (Drafts & Published Edits) -->
       <section class="bg-white border border-neutral-200 rounded-sm p-5">
         <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
           <h2 id="formHeading" class="text-xs font-bold uppercase tracking-wider text-neutral-900">Write New Draft</h2>
@@ -110,6 +110,10 @@
 
         <form id="postForm" class="space-y-4">
           <input id="draftId" type="hidden" value="" />
+          <input id="publishedFile" type="hidden" value="" />
+          <input id="publishedSha" type="hidden" value="" />
+          <input id="publishedDate" type="hidden" value="" />
+
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
               <label for="postTitle" class="block text-xs font-semibold text-neutral-700 mb-1">Headline *</label>
@@ -149,15 +153,15 @@
           </div>
 
           <div class="flex items-center gap-3 pt-1">
-            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2 rounded-sm transition cursor-pointer">
+            <button id="submitPostBtn" type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2 rounded-sm transition cursor-pointer">
               Save Draft
             </button>
-            <span class="text-xs text-neutral-500">Published posts automatically get sequential numeric slugs (1.md, 2.md, …).</span>
+            <span id="formHint" class="text-xs text-neutral-500">Published posts automatically get sequential numeric slugs (1.md, 2.md, …).</span>
           </div>
         </form>
       </section>
 
-      <!-- Draft List -->
+      <!-- Saved Drafts (IndexedDB) -->
       <section class="bg-white border border-neutral-200 rounded-sm p-5">
         <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
           <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900">Saved Drafts</h2>
@@ -178,8 +182,44 @@
             <tbody id="draftTableBody" class="divide-y divide-neutral-200"></tbody>
           </table>
         </div>
-        <div id="noDraftsMsg" class="hidden py-8 text-center text-sm text-neutral-500">
+        <div id="noDraftsMsg" class="hidden py-6 text-center text-sm text-neutral-500">
           No drafts yet. Write a post above and click "Save Draft".
+        </div>
+      </section>
+
+      <!-- Published Posts (GitHub) -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
+          <div class="flex items-center gap-3">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900">Published Posts (GitHub)</h2>
+            <span id="publishedCount" class="text-xs font-semibold text-neutral-500"></span>
+          </div>
+          <button id="refreshPublishedBtn" type="button" class="text-xs font-semibold border border-neutral-300 hover:border-black px-2.5 py-1 rounded-sm cursor-pointer">
+            Refresh
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse text-sm">
+            <thead>
+              <tr class="border-b border-neutral-300 bg-neutral-50 text-xs uppercase text-neutral-600">
+                <th class="py-2 px-3">Headline</th>
+                <th class="py-2 px-3">Category</th>
+                <th class="py-2 px-3">Slug</th>
+                <th class="py-2 px-3">Published</th>
+                <th class="py-2 px-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="publishedTableBody" class="divide-y divide-neutral-200"></tbody>
+          </table>
+        </div>
+        <div id="noPublishedMsg" class="hidden py-6 text-center text-sm text-neutral-500">
+          No published posts found on GitHub.
+        </div>
+        <div id="loadMorePubWrap" class="hidden pt-4 text-center">
+          <button id="loadMorePubBtn" type="button" class="text-xs font-semibold border border-neutral-300 hover:border-black px-4 py-1.5 rounded-sm cursor-pointer">
+            Load More
+          </button>
         </div>
       </section>
     </main>
@@ -200,6 +240,7 @@
       const DEFAULT_OWNER = 'mrx547835-ai';
       const DEFAULT_REPO = 'Notun-Alo';
       const DEFAULT_BRANCH = 'main';
+      const PUB_PAGE_SIZE = 10;
 
       const DB_NAME = 'NewspaperDB';
       const DB_VERSION = 1;
@@ -224,7 +265,13 @@
       const postForm = document.getElementById('postForm');
       const formHeading = document.getElementById('formHeading');
       const cancelEditBtn = document.getElementById('cancelEditBtn');
+      const submitPostBtn = document.getElementById('submitPostBtn');
+      const formHint = document.getElementById('formHint');
       const draftIdInput = document.getElementById('draftId');
+      const publishedFileInput = document.getElementById('publishedFile');
+      const publishedShaInput = document.getElementById('publishedSha');
+      const publishedDateInput = document.getElementById('publishedDate');
+
       const postTitle = document.getElementById('postTitle');
       const postCategory = document.getElementById('postCategory');
       const postAuthor = document.getElementById('postAuthor');
@@ -235,6 +282,17 @@
       const draftTableBody = document.getElementById('draftTableBody');
       const noDraftsMsg = document.getElementById('noDraftsMsg');
       const draftCount = document.getElementById('draftCount');
+
+      const publishedTableBody = document.getElementById('publishedTableBody');
+      const noPublishedMsg = document.getElementById('noPublishedMsg');
+      const publishedCount = document.getElementById('publishedCount');
+      const refreshPublishedBtn = document.getElementById('refreshPublishedBtn');
+      const loadMorePubWrap = document.getElementById('loadMorePubWrap');
+      const loadMorePubBtn = document.getElementById('loadMorePubBtn');
+
+      let publishedManifestList = [];
+      let publishedVisibleCount = PUB_PAGE_SIZE;
+      const publishedMetaCache = new Map(); // filename -> { title, category, date, v }
 
       function escapeHtml(str) {
         return String(str || '')
@@ -274,6 +332,15 @@
         }
         statusBox.innerHTML = htmlMsg;
         statusBox.classList.remove('hidden');
+      }
+
+      function getGhCreds() {
+        return {
+          token: ghToken.value.trim() || localStorage.getItem(GH_KEYS.token) || '',
+          owner: ghOwner.value.trim() || localStorage.getItem(GH_KEYS.owner) || DEFAULT_OWNER,
+          repo: ghRepo.value.trim() || localStorage.getItem(GH_KEYS.repo) || DEFAULT_REPO,
+          branch: ghBranch.value.trim() || localStorage.getItem(GH_KEYS.branch) || DEFAULT_BRANCH
+        };
       }
 
       // IndexedDB Helpers (Drafts Only)
@@ -338,6 +405,7 @@
           adminView.classList.remove('hidden');
           loadGitHubSettings();
           renderDrafts();
+          loadPublishedPosts(true);
         } else {
           adminView.classList.add('hidden');
           loginView.classList.remove('hidden');
@@ -381,21 +449,205 @@
         localStorage.setItem(GH_KEYS.repo, ghRepo.value.trim() || DEFAULT_REPO);
         localStorage.setItem(GH_KEYS.branch, ghBranch.value.trim() || DEFAULT_BRANCH);
         showStatus('GitHub settings saved.', 'success');
+        loadPublishedPosts(true);
       });
 
-      // Draft Form
+      // Form Reset & Mode Switching
       function resetForm() {
         draftIdInput.value = '';
+        publishedFileInput.value = '';
+        publishedShaInput.value = '';
+        publishedDateInput.value = '';
         postForm.reset();
         postCategory.value = 'National';
         formHeading.textContent = 'Write New Draft';
+        submitPostBtn.textContent = 'Save Draft';
+        submitPostBtn.className = 'bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2 rounded-sm transition cursor-pointer';
+        formHint.textContent = 'Published posts automatically get sequential numeric slugs (1.md, 2.md, …).';
         cancelEditBtn.classList.add('hidden');
       }
 
       cancelEditBtn.addEventListener('click', resetForm);
 
+      function parseMarkdown(raw, filename) {
+        const normalized = String(raw || '').replace(/\r\n/g, '\n');
+        const fmMatch = normalized.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+        const meta = {
+          title: filename.replace(/\.md$/i, ''),
+          date: '',
+          category: 'National',
+          author: 'Staff Correspondent',
+          image: ''
+        };
+        let bodyRaw = normalized;
+
+        if (fmMatch) {
+          fmMatch[1].split('\n').forEach(function (line) {
+            const idx = line.indexOf(':');
+            if (idx === -1) return;
+            const key = line.slice(0, idx).trim().toLowerCase();
+            let val = line.slice(idx + 1).trim();
+            if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
+              val = val.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
+            }
+            if (key in meta) meta[key] = val;
+          });
+          bodyRaw = fmMatch[2] || '';
+        }
+
+        const lines = bodyRaw.split('\n');
+        let firstIdx = 0;
+        while (firstIdx < lines.length && lines[firstIdx].trim() === '') firstIdx++;
+
+        return {
+          title: meta.title,
+          date: meta.date,
+          category: meta.category,
+          author: meta.author,
+          image: meta.image,
+          excerpt: firstIdx < lines.length ? lines[firstIdx].trim() : '',
+          content: lines.slice(firstIdx + 1).join('\n').trim()
+        };
+      }
+
+      function escapeYamlString(val) {
+        return String(val || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, ' ');
+      }
+
+      function draftToMarkdown(post) {
+        const singleLineExcerpt = String(post.excerpt || '').replace(/\r?\n/g, ' ').trim();
+        return [
+          '---',
+          `title: "${escapeYamlString(post.title)}"`,
+          `date: ${post.date || new Date().toISOString()}`,
+          `category: ${post.category || 'National'}`,
+          `author: "${escapeYamlString(post.author || 'Staff Correspondent')}"`,
+          `image: "${escapeYamlString(post.image || '')}"`,
+          '---',
+          singleLineExcerpt,
+          '',
+          post.content || ''
+        ].join('\n');
+      }
+
+      async function ghFetchJson(url, token) {
+        const headers = { 'Accept': 'application/vnd.github+json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        return await fetch(url, { headers: headers, cache: 'no-store' });
+      }
+
+      // Read current posts/ directory and posts/index.json
+      async function getRepoPostState(owner, repo, branch, token) {
+        const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
+        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json?ref=${encodeURIComponent(branch)}`;
+
+        let maxNumber = 0;
+        let dirFiles = [];
+        let manifestEntries = [];
+        let manifestSha = null;
+
+        const listRes = await ghFetchJson(listUrl, token);
+        if (listRes.ok) {
+          const items = await listRes.json();
+          if (Array.isArray(items)) {
+            items.forEach(function (item) {
+              if (item.type === 'file' && item.name.toLowerCase().endsWith('.md')) {
+                dirFiles.push(item.name);
+                const m = item.name.match(/^(\d+)\.md$/i);
+                if (m) maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
+              } else if (item.name === 'index.json' && item.sha) {
+                manifestSha = item.sha;
+              }
+            });
+          }
+        }
+
+        const manRes = await ghFetchJson(manifestUrl, token);
+        if (manRes.ok) {
+          const manData = await manRes.json();
+          if (manData && manData.sha) manifestSha = manData.sha;
+          if (manData && manData.content) {
+            try {
+              const parsed = JSON.parse(base64ToUtf8(manData.content));
+              if (Array.isArray(parsed)) {
+                manifestEntries = parsed;
+                parsed.forEach(function (e) {
+                  if (typeof e === 'number') maxNumber = Math.max(maxNumber, e);
+                  else if (typeof e === 'string') {
+                    const m = e.match(/^(\d+)\.md$/i);
+                    if (m) maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
+                  } else if (e && typeof e === 'object' && e.n != null) {
+                    maxNumber = Math.max(maxNumber, Number(e.n) || 0);
+                  }
+                });
+              }
+            } catch (_) { /* ignore */ }
+          }
+        }
+
+        return { maxNumber, dirFiles, manifestEntries, manifestSha };
+      }
+
+      function normalizeEntryMap(state) {
+        const map = new Map();
+        state.manifestEntries.forEach(function (e) {
+          if (typeof e === 'number') {
+            map.set(`${e}.md`, { n: e });
+          } else if (typeof e === 'string' && e.toLowerCase().endsWith('.md')) {
+            const m = e.match(/^(\d+)\.md$/i);
+            map.set(e, m ? { n: parseInt(m[1], 10) } : { f: e });
+          } else if (e && typeof e === 'object') {
+            const fname = e.n != null ? `${e.n}.md` : (e.f || e.file || '');
+            if (fname) map.set(fname, e);
+          }
+        });
+        state.dirFiles.forEach(function (fname) {
+          if (!map.has(fname)) {
+            const m = fname.match(/^(\d+)\.md$/i);
+            map.set(fname, m ? { n: parseInt(m[1], 10) } : { f: fname });
+          }
+        });
+        return map;
+      }
+
+      async function writeManifestMap(owner, repo, branch, token, entryMap, manifestSha, commitMsg) {
+        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json`;
+        const list = Array.from(entryMap.values()).sort(function (a, b) {
+          return (Number(b.n) || 0) - (Number(a.n) || 0);
+        });
+
+        const putBody = {
+          message: commitMsg,
+          content: utf8ToBase64(JSON.stringify(list)),
+          branch: branch
+        };
+        if (manifestSha) putBody.sha = manifestSha;
+
+        const res = await fetch(manifestUrl, {
+          method: 'PUT',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/vnd.github+json',
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(putBody)
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(function () { return {}; });
+          throw new Error(err.message || `Manifest update error (${res.status})`);
+        }
+      }
+
+      // Form Submit: either Update Published Post OR Save Local Draft
       postForm.addEventListener('submit', async function (e) {
         e.preventDefault();
+
+        const pubFile = publishedFileInput.value.trim();
+        if (pubFile) {
+          await updatePublishedPost(pubFile);
+          return;
+        }
+
         const existingId = draftIdInput.value ? Number(draftIdInput.value) : null;
         let existingDraft = null;
         if (existingId) {
@@ -429,150 +681,96 @@
         }
       });
 
-      function escapeYamlString(val) {
-        return String(val || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, ' ');
-      }
-
-      function draftToMarkdown(draft) {
-        const singleLineExcerpt = String(draft.excerpt || '').replace(/\r?\n/g, ' ').trim();
-        return [
-          '---',
-          `title: "${escapeYamlString(draft.title)}"`,
-          `date: ${draft.date || new Date().toISOString()}`,
-          `category: ${draft.category || 'National'}`,
-          `author: "${escapeYamlString(draft.author || 'Staff Correspondent')}"`,
-          `image: "${escapeYamlString(draft.image || '')}"`,
-          '---',
-          singleLineExcerpt,
-          '',
-          draft.content || ''
-        ].join('\n');
-      }
-
-      async function ghFetchJson(url, token) {
-        const res = await fetch(url, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json'
-          },
-          cache: 'no-store'
-        });
-        return res;
-      }
-
-      // Read posts/ directory + posts/index.json to determine next numeric slug & update compact manifest
-      async function getRepoPostState(owner, repo, branch, token) {
-        const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
-        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json?ref=${encodeURIComponent(branch)}`;
-
-        let maxNumber = 0;
-        let dirFiles = [];
-        let manifestEntries = [];
-        let manifestSha = null;
-
-        const listRes = await ghFetchJson(listUrl, token);
-        if (listRes.ok) {
-          const items = await listRes.json();
-          if (Array.isArray(items)) {
-            items.forEach(function (item) {
-              if (item.type === 'file' && item.name.toLowerCase().endsWith('.md')) {
-                dirFiles.push(item.name);
-                const m = item.name.match(/^(\d+)\.md$/i);
-                if (m) {
-                  maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
-                }
-              } else if (item.name === 'index.json' && item.sha) {
-                manifestSha = item.sha;
-              }
-            });
-          }
+      // Update an already-published post directly on GitHub
+      async function updatePublishedPost(fileName) {
+        const { token, owner, repo, branch } = getGhCreds();
+        if (!token || !owner || !repo) {
+          showStatus('Please enter your GitHub Personal Access Token before updating.', 'error');
+          return;
         }
 
-        const manRes = await ghFetchJson(manifestUrl, token);
-        if (manRes.ok) {
-          const manData = await manRes.json();
-          if (manData && manData.sha) manifestSha = manData.sha;
-          if (manData && manData.content) {
-            try {
-              const parsed = JSON.parse(base64ToUtf8(manData.content));
-              if (Array.isArray(parsed)) {
-                manifestEntries = parsed;
-                parsed.forEach(function (e) {
-                  if (typeof e === 'number') maxNumber = Math.max(maxNumber, e);
-                  else if (typeof e === 'string') {
-                    const m = e.match(/^(\d+)\.md$/i);
-                    if (m) maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
-                  } else if (e && typeof e === 'object' && e.n != null) {
-                    maxNumber = Math.max(maxNumber, Number(e.n) || 0);
-                  }
-                });
-              }
-            } catch (_) { /* ignore malformed manifest */ }
+        submitPostBtn.disabled = true;
+        submitPostBtn.textContent = 'Updating...';
+        showStatus(`Updating <strong>posts/${escapeHtml(fileName)}</strong> on GitHub...`, 'info');
+
+        try {
+          const filePath = `posts/${fileName}`;
+          const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
+
+          let sha = publishedShaInput.value.trim();
+          if (!sha) {
+            const getRes = await ghFetchJson(`${apiUrl}?ref=${encodeURIComponent(branch)}`, token);
+            if (!getRes.ok) throw new Error(`Could not locate ${filePath} (${getRes.status})`);
+            const data = await getRes.json();
+            sha = data.sha;
+          }
+
+          const origDate = publishedDateInput.value.trim() || new Date().toISOString();
+          const updatedPost = {
+            title: postTitle.value.trim(),
+            category: postCategory.value,
+            excerpt: postExcerpt.value.replace(/\r?\n/g, ' ').trim(),
+            content: postContent.value.trim(),
+            image: postImage.value.trim(),
+            author: postAuthor.value.trim() || 'Staff Correspondent',
+            date: origDate
+          };
+
+          const putRes = await fetch(apiUrl, {
+            method: 'PUT',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/vnd.github+json',
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              message: `Edit ${fileName}: ${updatedPost.title}`,
+              content: utf8ToBase64(draftToMarkdown(updatedPost)),
+              sha: sha,
+              branch: branch
+            })
+          });
+
+          const putData = await putRes.json().catch(function () { return {}; });
+          if (!putRes.ok) {
+            throw new Error(putData.message || `GitHub PUT error (${putRes.status})`);
+          }
+
+          // Bump version (v) in posts/index.json so reader caches refresh this post
+          const state = await getRepoPostState(owner, repo, branch, token);
+          const entryMap = normalizeEntryMap(state);
+          const prev = entryMap.get(fileName) || {};
+          const m = fileName.match(/^(\d+)\.md$/i);
+          const nextV = (Number(prev.v) || 1) + 1;
+          const newEntry = m
+            ? { n: parseInt(m[1], 10), d: prev.d || origDate, v: nextV }
+            : { f: fileName, d: prev.d || origDate, v: nextV };
+          entryMap.set(fileName, newEntry);
+          await writeManifestMap(owner, repo, branch, token, entryMap, state.manifestSha, `Update index.json (edit ${fileName})`);
+
+          publishedMetaCache.set(fileName, {
+            title: updatedPost.title,
+            category: updatedPost.category,
+            date: origDate,
+            v: nextV
+          });
+
+          resetForm();
+          await loadPublishedPosts(true);
+          showStatus(`Updated <strong>${escapeHtml(filePath)}</strong> successfully.`, 'success');
+        } catch (err) {
+          showStatus('Update Error: ' + escapeHtml(err.message), 'error');
+        } finally {
+          submitPostBtn.disabled = false;
+          if (publishedFileInput.value) {
+            submitPostBtn.textContent = 'Update Published Post';
           }
         }
-
-        return { maxNumber, dirFiles, manifestEntries, manifestSha };
       }
 
-      async function syncCompactManifest(owner, repo, branch, token, state, slugNum, postDateIso) {
-        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json`;
-        const entryMap = new Map();
-
-        // Keep existing manifest entries (preserving their dates)
-        state.manifestEntries.forEach(function (e) {
-          if (typeof e === 'number') {
-            entryMap.set(`${e}.md`, { n: e });
-          } else if (typeof e === 'string' && e.toLowerCase().endsWith('.md')) {
-            const m = e.match(/^(\d+)\.md$/i);
-            entryMap.set(e, m ? { n: parseInt(m[1], 10) } : { f: e });
-          } else if (e && typeof e === 'object') {
-            const fname = e.n != null ? `${e.n}.md` : (e.f || e.file || '');
-            if (fname) entryMap.set(fname, e);
-          }
-        });
-
-        // Include any .md file in posts/ missing from manifest
-        state.dirFiles.forEach(function (fname) {
-          if (!entryMap.has(fname)) {
-            const m = fname.match(/^(\d+)\.md$/i);
-            entryMap.set(fname, m ? { n: parseInt(m[1], 10) } : { f: fname });
-          }
-        });
-
-        // Add/update newly published numeric post with compact { n, d }
-        entryMap.set(`${slugNum}.md`, { n: slugNum, d: postDateIso });
-
-        const list = Array.from(entryMap.values()).sort(function (a, b) {
-          return (Number(b.n) || 0) - (Number(a.n) || 0);
-        });
-
-        const putBody = {
-          message: `Update index.json (#${slugNum})`,
-          content: utf8ToBase64(JSON.stringify(list)),
-          branch: branch
-        };
-        if (state.manifestSha) {
-          putBody.sha = state.manifestSha;
-        }
-
-        await fetch(manifestUrl, {
-          method: 'PUT',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Accept': 'application/vnd.github+json',
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify(putBody)
-        });
-      }
-
-      // Publish to GitHub with Sequential Numeric Slug
+      // Publish a Draft with Sequential Numeric Slug
       async function publishDraft(draft) {
-        const token = ghToken.value.trim() || localStorage.getItem(GH_KEYS.token) || '';
-        const owner = ghOwner.value.trim() || localStorage.getItem(GH_KEYS.owner) || DEFAULT_OWNER;
-        const repo = ghRepo.value.trim() || localStorage.getItem(GH_KEYS.repo) || DEFAULT_REPO;
-        const branch = ghBranch.value.trim() || localStorage.getItem(GH_KEYS.branch) || DEFAULT_BRANCH;
-
+        const { token, owner, repo, branch } = getGhCreds();
         if (!token || !owner || !repo) {
           showStatus('Please enter your GitHub Personal Access Token before publishing.', 'error');
           return;
@@ -591,9 +789,7 @@
           const getRes = await ghFetchJson(`${apiUrl}?ref=${encodeURIComponent(branch)}`, token);
           if (getRes.ok) {
             const existingData = await getRes.json();
-            if (existingData && existingData.sha) {
-              existingSha = existingData.sha;
-            }
+            if (existingData && existingData.sha) existingSha = existingData.sha;
           } else if (getRes.status !== 404) {
             const errJson = await getRes.json().catch(function () { return {}; });
             throw new Error(errJson.message || `GitHub GET error (${getRes.status})`);
@@ -615,9 +811,7 @@
             content: utf8ToBase64(md),
             branch: branch
           };
-          if (existingSha) {
-            putPayload.sha = existingSha;
-          }
+          if (existingSha) putPayload.sha = existingSha;
 
           const putRes = await fetch(apiUrl, {
             method: 'PUT',
@@ -634,11 +828,24 @@
             throw new Error(putData.message || `GitHub PUT error (${putRes.status})`);
           }
 
-          // Remember slugNumber on draft in case user keeps it for edits
           draft.slugNumber = slugNum;
           await saveDraftToDB(draft);
 
-          await syncCompactManifest(owner, repo, branch, token, state, slugNum, publishDateIso).catch(function () {});
+          const entryMap = normalizeEntryMap(state);
+          const prev = entryMap.get(fileName);
+          const nextV = prev ? (Number(prev.v) || 1) + 1 : 1;
+          const manifestEntry = nextV > 1
+            ? { n: slugNum, d: prev.d || publishDateIso, v: nextV }
+            : { n: slugNum, d: publishDateIso };
+          entryMap.set(fileName, manifestEntry);
+          await writeManifestMap(owner, repo, branch, token, entryMap, state.manifestSha, `Update index.json (#${slugNum})`).catch(function () {});
+
+          publishedMetaCache.set(fileName, {
+            title: draft.title,
+            category: draft.category,
+            date: publishDateIso,
+            v: nextV
+          });
 
           const fileUrl = (putData.content && putData.content.html_url)
             ? putData.content.html_url
@@ -650,13 +857,12 @@
           );
 
           await renderDrafts();
+          await loadPublishedPosts(true);
 
           setTimeout(async function () {
             if (confirm(`Published as ${fileName}. Delete local draft?`)) {
               await deleteDraftFromDB(draft.id);
-              if (Number(draftIdInput.value) === draft.id) {
-                resetForm();
-              }
+              if (Number(draftIdInput.value) === draft.id) resetForm();
               await renderDrafts();
             }
           }, 50);
@@ -664,6 +870,272 @@
           showStatus('GitHub Publish Error: ' + escapeHtml(err.message), 'error');
         }
       }
+
+      // Delete an already-published post from GitHub + posts/index.json
+      async function deletePublishedPost(fileName) {
+        const { token, owner, repo, branch } = getGhCreds();
+        if (!token || !owner || !repo) {
+          showStatus('Please enter your GitHub Personal Access Token before deleting.', 'error');
+          return;
+        }
+        if (!confirm(`Permanently delete posts/${fileName} from GitHub?`)) return;
+
+        showStatus(`Deleting <strong>posts/${escapeHtml(fileName)}</strong>...`, 'info');
+
+        try {
+          const filePath = `posts/${fileName}`;
+          const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
+
+          const getRes = await ghFetchJson(`${apiUrl}?ref=${encodeURIComponent(branch)}`, token);
+          if (getRes.ok) {
+            const fileData = await getRes.json();
+            const delRes = await fetch(apiUrl, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({
+                message: `Delete ${fileName}`,
+                sha: fileData.sha,
+                branch: branch
+              })
+            });
+            if (!delRes.ok) {
+              const err = await delRes.json().catch(function () { return {}; });
+              throw new Error(err.message || `GitHub DELETE error (${delRes.status})`);
+            }
+          } else if (getRes.status !== 404) {
+            throw new Error(`GitHub GET error (${getRes.status})`);
+          }
+
+          // Remove from posts/index.json
+          const state = await getRepoPostState(owner, repo, branch, token);
+          const entryMap = normalizeEntryMap(state);
+          entryMap.delete(fileName);
+          if (state.manifestSha || entryMap.size > 0) {
+            await writeManifestMap(owner, repo, branch, token, entryMap, state.manifestSha, `Remove ${fileName} from index.json`);
+          }
+
+          // Clear slugNumber on any matching local draft
+          const m = fileName.match(/^(\d+)\.md$/i);
+          if (m) {
+            const deletedNum = parseInt(m[1], 10);
+            const drafts = await getAllDrafts();
+            for (const d of drafts) {
+              if (d.slugNumber === deletedNum) {
+                delete d.slugNumber;
+                await saveDraftToDB(d);
+              }
+            }
+            await renderDrafts();
+          }
+
+          if (publishedFileInput.value === fileName) resetForm();
+          publishedMetaCache.delete(fileName);
+          await loadPublishedPosts(true);
+          showStatus(`Deleted <strong>${escapeHtml(filePath)}</strong> from GitHub.`, 'info');
+        } catch (err) {
+          showStatus('Delete Error: ' + escapeHtml(err.message), 'error');
+        }
+      }
+
+      // Open a published post in the editor
+      async function editPublishedPost(fileName) {
+        const { token, owner, repo, branch } = getGhCreds();
+        if (!token || !owner || !repo) {
+          showStatus('Please enter your GitHub Personal Access Token before editing published posts.', 'error');
+          return;
+        }
+
+        showStatus(`Loading <strong>posts/${escapeHtml(fileName)}</strong> for editing...`, 'info');
+
+        try {
+          const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/${encodeURIComponent(fileName)}?ref=${encodeURIComponent(branch)}`;
+          const res = await ghFetchJson(apiUrl, token);
+          if (!res.ok) {
+            const err = await res.json().catch(function () { return {}; });
+            throw new Error(err.message || `Failed to load (${res.status})`);
+          }
+          const data = await res.json();
+          const rawMd = base64ToUtf8(data.content);
+          const parsed = parseMarkdown(rawMd, fileName);
+
+          draftIdInput.value = '';
+          publishedFileInput.value = fileName;
+          publishedShaInput.value = data.sha || '';
+          publishedDateInput.value = parsed.date || '';
+
+          postTitle.value = parsed.title || '';
+          postCategory.value = parsed.category || 'National';
+          postAuthor.value = parsed.author || '';
+          postImage.value = parsed.image || '';
+          postExcerpt.value = parsed.excerpt || '';
+          postContent.value = parsed.content || '';
+
+          formHeading.textContent = `Edit Published Post (${fileName})`;
+          submitPostBtn.textContent = 'Update Published Post';
+          submitPostBtn.className = 'bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold px-5 py-2 rounded-sm transition cursor-pointer';
+          formHint.textContent = `Editing live GitHub file posts/${fileName}. Original publish date is preserved.`;
+          cancelEditBtn.classList.remove('hidden');
+          statusBox.classList.add('hidden');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (err) {
+          showStatus('Load Error: ' + escapeHtml(err.message), 'error');
+        }
+      }
+
+      // Load Published Posts list (minimal: index.json + fetch titles only for visible page)
+      async function loadPublishedPosts(resetPage) {
+        if (resetPage) publishedVisibleCount = PUB_PAGE_SIZE;
+        const { owner, repo, branch } = getGhCreds();
+
+        try {
+          let entries = [];
+          const manifestUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/index.json?t=${Date.now()}`;
+          const res = await fetch(manifestUrl, { cache: 'no-store' });
+
+          if (res.ok) {
+            const list = await res.json();
+            if (Array.isArray(list)) {
+              entries = list.map(function (e) {
+                if (typeof e === 'number') return { filename: `${e}.md`, num: e, date: '', v: 1 };
+                if (typeof e === 'string' && e.toLowerCase().endsWith('.md')) {
+                  const m = e.match(/^(\d+)\.md$/i);
+                  return { filename: e, num: m ? parseInt(m[1], 10) : 0, date: '', v: 1 };
+                }
+                if (e && typeof e === 'object') {
+                  const filename = e.n != null ? `${e.n}.md` : (e.f || e.file || '');
+                  if (!filename || !filename.toLowerCase().endsWith('.md')) return null;
+                  return { filename: filename, num: Number(e.n) || 0, date: e.d || '', v: Number(e.v) || 1 };
+                }
+                return null;
+              }).filter(Boolean);
+            }
+          } else {
+            // Fallback to Contents API if index.json doesn't exist yet
+            const apiRes = await ghFetchJson(
+              `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`,
+              getGhCreds().token
+            );
+            if (apiRes.ok) {
+              const items = await apiRes.json();
+              if (Array.isArray(items)) {
+                entries = items
+                  .filter(function (i) { return i.type === 'file' && i.name.toLowerCase().endsWith('.md'); })
+                  .map(function (i) {
+                    const m = i.name.match(/^(\d+)\.md$/i);
+                    return { filename: i.name, num: m ? parseInt(m[1], 10) : 0, date: '', v: 1 };
+                  });
+              }
+            }
+          }
+
+          entries.sort(function (a, b) {
+            if (b.num !== a.num) return b.num - a.num;
+            return (Date.parse(b.date) || 0) - (Date.parse(a.date) || 0);
+          });
+
+          publishedManifestList = entries;
+          await renderPublishedTable();
+        } catch (_) {
+          publishedManifestList = [];
+          await renderPublishedTable();
+        }
+      }
+
+      async function renderPublishedTable() {
+        const total = publishedManifestList.length;
+        publishedCount.textContent = total + (total === 1 ? ' post' : ' posts');
+
+        if (total === 0) {
+          publishedTableBody.innerHTML = '';
+          noPublishedMsg.classList.remove('hidden');
+          loadMorePubWrap.classList.add('hidden');
+          return;
+        }
+
+        noPublishedMsg.classList.add('hidden');
+        const visible = publishedManifestList.slice(0, publishedVisibleCount);
+        const { owner, repo, branch } = getGhCreds();
+
+        // Fetch titles/categories ONLY for visible rows not yet cached in memory
+        await Promise.allSettled(
+          visible.map(async function (entry) {
+            const cached = publishedMetaCache.get(entry.filename);
+            if (cached && cached.v >= entry.v) return;
+            const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(entry.filename)}?v=${entry.v}`;
+            const res = await fetch(rawUrl);
+            if (!res.ok) return;
+            const parsed = parseMarkdown(await res.text(), entry.filename);
+            publishedMetaCache.set(entry.filename, {
+              title: parsed.title,
+              category: parsed.category,
+              date: parsed.date || entry.date,
+              v: entry.v
+            });
+          })
+        );
+
+        publishedTableBody.innerHTML = visible.map(function (entry) {
+          const meta = publishedMetaCache.get(entry.filename);
+          const title = meta ? meta.title : entry.filename;
+          const category = meta ? meta.category : '—';
+          const dateStr = (meta && meta.date) || entry.date;
+          const dateDisplay = dateStr ? new Date(dateStr).toLocaleDateString() : '—';
+
+          return `
+            <tr class="hover:bg-neutral-50">
+              <td class="py-2.5 px-3 font-semibold text-neutral-900">${escapeHtml(title)}</td>
+              <td class="py-2.5 px-3">
+                <span class="text-xs font-bold uppercase text-red-600 bg-red-50 px-2 py-0.5 rounded-sm">${escapeHtml(category)}</span>
+              </td>
+              <td class="py-2.5 px-3"><span class="text-xs font-mono bg-neutral-100 px-1.5 py-0.5 rounded-sm">${escapeHtml(entry.filename)}</span></td>
+              <td class="py-2.5 px-3 text-xs text-neutral-500 whitespace-nowrap">${escapeHtml(dateDisplay)}</td>
+              <td class="py-2.5 px-3 text-right whitespace-nowrap space-x-1.5">
+                <button type="button" data-pub-action="edit" data-file="${escapeHtml(entry.filename)}" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-900 text-xs font-semibold px-2.5 py-1 rounded-sm cursor-pointer">Edit</button>
+                <button type="button" data-pub-action="delete" data-file="${escapeHtml(entry.filename)}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1 rounded-sm cursor-pointer">Delete</button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        if (visible.length < total) {
+          loadMorePubWrap.classList.remove('hidden');
+          loadMorePubBtn.textContent = `Load More (${total - visible.length} remaining)`;
+        } else {
+          loadMorePubWrap.classList.add('hidden');
+        }
+      }
+
+      refreshPublishedBtn.addEventListener('click', function () {
+        publishedMetaCache.clear();
+        loadPublishedPosts(true);
+      });
+
+      loadMorePubBtn.addEventListener('click', function () {
+        publishedVisibleCount += PUB_PAGE_SIZE;
+        renderPublishedTable();
+      });
+
+      publishedTableBody.addEventListener('click', async function (e) {
+        const btn = e.target.closest('button[data-pub-action]');
+        if (!btn) return;
+        const action = btn.getAttribute('data-pub-action');
+        const fileName = btn.getAttribute('data-file');
+
+        btn.disabled = true;
+        try {
+          if (action === 'edit') {
+            await editPublishedPost(fileName);
+          } else if (action === 'delete') {
+            await deletePublishedPost(fileName);
+          }
+        } finally {
+          btn.disabled = false;
+        }
+      });
 
       // Render Drafts Table
       async function renderDrafts() {
@@ -720,6 +1192,7 @@
         }
 
         if (action === 'edit') {
+          resetForm();
           draftIdInput.value = String(draft.id);
           postTitle.value = draft.title || '';
           postCategory.value = draft.category || 'National';
@@ -743,9 +1216,7 @@
         } else if (action === 'delete') {
           if (confirm(`Delete draft "${draft.title}"?`)) {
             await deleteDraftFromDB(id);
-            if (Number(draftIdInput.value) === id) {
-              resetForm();
-            }
+            if (Number(draftIdInput.value) === id) resetForm();
             await renderDrafts();
             showStatus('Draft deleted.', 'info');
           }
