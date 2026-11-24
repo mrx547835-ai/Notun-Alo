@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Norun Alo — Admin Panel</title>
+  <title>Notun Alo — Admin Panel</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -21,10 +21,10 @@
 
   <!-- Login Screen -->
   <div id="loginView" class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-white border border-neutral-200 rounded-sm shadow-sm p-8">
+    <div class="w-full max-w-sm bg-white border border-neutral-200 rounded-sm shadow-sm p-7">
       <div class="text-center mb-6">
         <h1 class="font-editorial text-3xl font-bold text-black">
-          Daily <span class="text-red-600">Sylhet</span>
+          Notun <span class="text-red-600">Alo</span>
         </h1>
         <p class="text-xs uppercase tracking-widest text-neutral-500 mt-1 font-semibold">Editorial Admin Desk</p>
       </div>
@@ -43,76 +43,76 @@
           Sign In
         </button>
       </form>
-      <div class="mt-6 text-center">
-        <a href="index.html" class="text-xs text-neutral-500 hover:text-black underline">&larr; Back to Newspaper Front Page</a>
+      <div class="mt-5 text-center">
+        <a href="index.html" class="text-xs text-neutral-500 hover:text-black underline">&larr; Back to Front Page</a>
       </div>
     </div>
   </div>
 
   <!-- Admin Dashboard -->
   <div id="adminView" class="hidden min-h-screen flex flex-col">
-    <!-- Top Header -->
     <header class="bg-black text-white border-b-2 border-red-600">
-      <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
         <div class="flex items-center gap-3">
-          <span class="font-editorial text-2xl font-bold">Daily <span class="text-red-500">Sylhet</span></span>
-          <span class="text-xs bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded uppercase tracking-wider">Admin Draft Desk</span>
+          <span class="font-editorial text-2xl font-bold">Notun <span class="text-red-500">Alo</span></span>
+          <span class="text-[11px] bg-neutral-800 text-neutral-300 px-2 py-0.5 rounded-sm uppercase tracking-wider">Admin</span>
         </div>
         <div class="flex items-center gap-4 text-sm">
-          <a href="index.html" target="_blank" class="text-neutral-300 hover:text-white underline underline-offset-2 text-xs sm:text-sm">View Front Page</a>
+          <a href="index.html" target="_blank" class="text-neutral-300 hover:text-white underline underline-offset-2 text-xs">View Front Page</a>
           <button id="logoutBtn" type="button" class="bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-semibold px-3 py-1.5 rounded-sm cursor-pointer">Logout</button>
         </div>
       </div>
     </header>
 
-    <main class="max-w-7xl w-full mx-auto px-4 py-6 space-y-6">
+    <main class="max-w-6xl w-full mx-auto px-4 py-6 space-y-6">
+      <div id="statusBox" class="hidden p-3.5 rounded-sm border text-sm"></div>
 
-      <!-- Global Status Alert -->
-      <div id="statusBox" class="hidden p-4 rounded-sm border text-sm"></div>
-
-      <!-- GitHub Settings Section -->
-      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900">GitHub Publish Settings</h2>
-          <span class="text-xs text-neutral-500">Saved locally in browser (token is never hardcoded)</span>
+      <!-- GitHub Settings -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900">GitHub Publish Settings</h2>
+          <span class="text-xs text-neutral-500">Saved locally in browser</span>
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
           <div>
             <label for="ghToken" class="block text-xs font-semibold text-neutral-700 mb-1">Personal Access Token</label>
-            <input id="ghToken" type="text" placeholder="Paste your GitHub token..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" value="github_pat_11CQVXY5I08Ld2CTrD9aOE_XczWNjK83O9Y9UnEcnMGw****cKrAP8yPZh6eshbd6SXPQjKWELLNB4VWqs43QL" />
+            <div class="relative">
+              <input id="ghToken" type="password" placeholder="GitHub PAT..." class="w-full border border-neutral-300 rounded-sm pl-3 pr-12 py-2 text-sm focus:outline-none focus:border-black" value="" />
+              <button id="toggleTokenBtn" type="button" class="absolute right-2 top-2 text-[11px] font-semibold text-neutral-500 hover:text-black cursor-pointer">Show</button>
+            </div>
           </div>
           <div>
-            <label for="ghOwner" class="block text-xs font-semibold text-neutral-700 mb-1">GitHub Owner</label>
-            <input id="ghOwner" type="text" value="mrx547835-ai" placeholder="username or org" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            <label for="ghOwner" class="block text-xs font-semibold text-neutral-700 mb-1">Owner</label>
+            <input id="ghOwner" type="text" value="mrx547835-ai" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
           </div>
           <div>
-            <label for="ghRepo" class="block text-xs font-semibold text-neutral-700 mb-1">Repository Name</label>
-            <input id="ghRepo" type="text" value="Notun-Alo" placeholder="Notun-Alo" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            <label for="ghRepo" class="block text-xs font-semibold text-neutral-700 mb-1">Repository</label>
+            <input id="ghRepo" type="text" value="Notun-Alo" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
           </div>
           <div>
             <label for="ghBranch" class="block text-xs font-semibold text-neutral-700 mb-1">Branch</label>
-            <input id="ghBranch" type="text" value="main" placeholder="main" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            <input id="ghBranch" type="text" value="main" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
           </div>
           <div>
             <button id="saveGhBtn" type="button" class="w-full bg-neutral-900 hover:bg-black text-white text-sm font-semibold px-4 py-2 rounded-sm transition cursor-pointer">
-              Save GitHub Settings
+              Save Settings
             </button>
           </div>
         </div>
       </section>
 
-      <!-- Post Composer (IndexedDB Drafts) -->
-      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
-          <h2 id="formHeading" class="text-sm font-bold uppercase tracking-wider text-neutral-900">Write New Draft</h2>
-          <button id="cancelEditBtn" type="button" class="hidden text-xs text-red-600 hover:underline font-semibold cursor-pointer">Cancel Edit (New Draft)</button>
+      <!-- Post Composer -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
+          <h2 id="formHeading" class="text-xs font-bold uppercase tracking-wider text-neutral-900">Write New Draft</h2>
+          <button id="cancelEditBtn" type="button" class="hidden text-xs text-red-600 hover:underline font-semibold cursor-pointer">Cancel Edit</button>
         </div>
 
         <form id="postForm" class="space-y-4">
           <input id="draftId" type="hidden" value="" />
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div class="md:col-span-2">
-              <label for="postTitle" class="block text-xs font-semibold text-neutral-700 mb-1">Headline / Title *</label>
+              <label for="postTitle" class="block text-xs font-semibold text-neutral-700 mb-1">Headline *</label>
               <input id="postTitle" type="text" required placeholder="Enter news headline..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
             </div>
             <div>
@@ -139,28 +139,28 @@
           </div>
 
           <div>
-            <label for="postExcerpt" class="block text-xs font-semibold text-neutral-700 mb-1">Excerpt (First line summary) *</label>
-            <input id="postExcerpt" type="text" required placeholder="Short one-line summary of the story..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+            <label for="postExcerpt" class="block text-xs font-semibold text-neutral-700 mb-1">Excerpt (Summary) *</label>
+            <input id="postExcerpt" type="text" required placeholder="Short one-line summary..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
           </div>
 
           <div>
             <label for="postContent" class="block text-xs font-semibold text-neutral-700 mb-1">Article Content *</label>
-            <textarea id="postContent" rows="8" required placeholder="Write the full article body here (supports English & বাংলা)..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black"></textarea>
+            <textarea id="postContent" rows="7" required placeholder="Write the full article (supports English & বাংলা)..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black"></textarea>
           </div>
 
           <div class="flex items-center gap-3 pt-1">
-            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2.5 rounded-sm transition cursor-pointer">
+            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-5 py-2 rounded-sm transition cursor-pointer">
               Save Draft
             </button>
-            <span class="text-xs text-neutral-500">Drafts are stored only in IndexedDB and never appear on the front page until published.</span>
+            <span class="text-xs text-neutral-500">Published posts automatically get sequential numeric slugs (1.md, 2.md, …).</span>
           </div>
         </form>
       </section>
 
-      <!-- Draft List Table (IndexedDB ONLY) -->
-      <section class="bg-white border border-neutral-200 rounded-sm p-5 shadow-xs">
-        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-4">
-          <h2 class="text-sm font-bold uppercase tracking-wider text-neutral-900">Saved Drafts (IndexedDB)</h2>
+      <!-- Draft List -->
+      <section class="bg-white border border-neutral-200 rounded-sm p-5">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-2.5 mb-4">
+          <h2 class="text-xs font-bold uppercase tracking-wider text-neutral-900">Saved Drafts</h2>
           <span id="draftCount" class="text-xs font-semibold text-neutral-500">0 drafts</span>
         </div>
 
@@ -168,18 +168,18 @@
           <table class="w-full text-left border-collapse text-sm">
             <thead>
               <tr class="border-b border-neutral-300 bg-neutral-50 text-xs uppercase text-neutral-600">
-                <th class="py-2.5 px-3">Title</th>
-                <th class="py-2.5 px-3">Category</th>
-                <th class="py-2.5 px-3">Author</th>
-                <th class="py-2.5 px-3">Saved Date</th>
-                <th class="py-2.5 px-3 text-right">Actions</th>
+                <th class="py-2 px-3">Title</th>
+                <th class="py-2 px-3">Category</th>
+                <th class="py-2 px-3">Slug</th>
+                <th class="py-2 px-3">Saved</th>
+                <th class="py-2 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody id="draftTableBody" class="divide-y divide-neutral-200"></tbody>
           </table>
         </div>
         <div id="noDraftsMsg" class="hidden py-8 text-center text-sm text-neutral-500">
-          No drafts in IndexedDB yet. Write a post above and click "Save Draft".
+          No drafts yet. Write a post above and click "Save Draft".
         </div>
       </section>
     </main>
@@ -215,6 +215,7 @@
 
       const statusBox = document.getElementById('statusBox');
       const ghToken = document.getElementById('ghToken');
+      const toggleTokenBtn = document.getElementById('toggleTokenBtn');
       const ghOwner = document.getElementById('ghOwner');
       const ghRepo = document.getElementById('ghRepo');
       const ghBranch = document.getElementById('ghBranch');
@@ -244,8 +245,26 @@
           .replace(/'/g, '&#39;');
       }
 
+      function utf8ToBase64(str) {
+        const bytes = new TextEncoder().encode(str);
+        let binary = '';
+        for (let i = 0; i < bytes.length; i++) {
+          binary += String.fromCharCode(bytes[i]);
+        }
+        return btoa(binary);
+      }
+
+      function base64ToUtf8(b64) {
+        const binary = atob(String(b64 || '').replace(/\s/g, ''));
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        return new TextDecoder().decode(bytes);
+      }
+
       function showStatus(htmlMsg, type) {
-        statusBox.className = 'p-4 rounded-sm border text-sm';
+        statusBox.className = 'p-3.5 rounded-sm border text-sm';
         if (type === 'error') {
           statusBox.classList.add('bg-red-50', 'border-red-300', 'text-red-900');
         } else if (type === 'info') {
@@ -257,7 +276,7 @@
         statusBox.classList.remove('hidden');
       }
 
-      // IndexedDB Helpers
+      // IndexedDB Helpers (Drafts Only)
       function openDB() {
         return new Promise(function (resolve, reject) {
           const req = indexedDB.open(DB_NAME, DB_VERSION);
@@ -267,12 +286,8 @@
               db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
             }
           };
-          req.onsuccess = function (e) {
-            resolve(e.target.result);
-          };
-          req.onerror = function () {
-            reject(req.error || new Error('Failed to open IndexedDB'));
-          };
+          req.onsuccess = function (e) { resolve(e.target.result); };
+          req.onerror = function () { reject(req.error || new Error('Failed to open IndexedDB')); };
         });
       }
 
@@ -280,8 +295,7 @@
         const db = await openDB();
         return new Promise(function (resolve, reject) {
           const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.getAll();
+          const req = tx.objectStore(STORE_NAME).getAll();
           req.onsuccess = function () { resolve(req.result || []); };
           req.onerror = function () { reject(req.error); };
         });
@@ -291,8 +305,7 @@
         const db = await openDB();
         return new Promise(function (resolve, reject) {
           const tx = db.transaction(STORE_NAME, 'readwrite');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.put(draftObj);
+          const req = tx.objectStore(STORE_NAME).put(draftObj);
           req.onsuccess = function () { resolve(req.result); };
           req.onerror = function () { reject(req.error); };
         });
@@ -302,8 +315,7 @@
         const db = await openDB();
         return new Promise(function (resolve, reject) {
           const tx = db.transaction(STORE_NAME, 'readonly');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.get(id);
+          const req = tx.objectStore(STORE_NAME).get(id);
           req.onsuccess = function () { resolve(req.result); };
           req.onerror = function () { reject(req.error); };
         });
@@ -313,17 +325,15 @@
         const db = await openDB();
         return new Promise(function (resolve, reject) {
           const tx = db.transaction(STORE_NAME, 'readwrite');
-          const store = tx.objectStore(STORE_NAME);
-          const req = store.delete(id);
+          const req = tx.objectStore(STORE_NAME).delete(id);
           req.onsuccess = function () { resolve(); };
           req.onerror = function () { reject(req.error); };
         });
       }
 
-      // Auth Handling
+      // Auth
       function checkAuth() {
-        const isLoggedIn = sessionStorage.getItem(AUTH_KEY) === 'true';
-        if (isLoggedIn) {
+        if (sessionStorage.getItem(AUTH_KEY) === 'true') {
           loginView.classList.add('hidden');
           adminView.classList.remove('hidden');
           loadGitHubSettings();
@@ -336,9 +346,7 @@
 
       loginForm.addEventListener('submit', function (e) {
         e.preventDefault();
-        const u = loginUser.value.trim();
-        const p = loginPass.value;
-        if (u === 'admin' && p === '1234') {
+        if (loginUser.value.trim() === 'admin' && loginPass.value === '1234') {
           sessionStorage.setItem(AUTH_KEY, 'true');
           loginError.classList.add('hidden');
           loginForm.reset();
@@ -361,15 +369,21 @@
         ghBranch.value = localStorage.getItem(GH_KEYS.branch) || DEFAULT_BRANCH;
       }
 
+      toggleTokenBtn.addEventListener('click', function () {
+        const isPass = ghToken.type === 'password';
+        ghToken.type = isPass ? 'text' : 'password';
+        toggleTokenBtn.textContent = isPass ? 'Hide' : 'Show';
+      });
+
       saveGhBtn.addEventListener('click', function () {
         localStorage.setItem(GH_KEYS.token, ghToken.value.trim());
         localStorage.setItem(GH_KEYS.owner, ghOwner.value.trim() || DEFAULT_OWNER);
         localStorage.setItem(GH_KEYS.repo, ghRepo.value.trim() || DEFAULT_REPO);
         localStorage.setItem(GH_KEYS.branch, ghBranch.value.trim() || DEFAULT_BRANCH);
-        showStatus('GitHub settings saved to localStorage.', 'success');
+        showStatus('GitHub settings saved.', 'success');
       });
 
-      // Draft Form Handling
+      // Draft Form
       function resetForm() {
         draftIdInput.value = '';
         postForm.reset();
@@ -383,6 +397,10 @@
       postForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         const existingId = draftIdInput.value ? Number(draftIdInput.value) : null;
+        let existingDraft = null;
+        if (existingId) {
+          existingDraft = await getDraftById(existingId);
+        }
 
         const draft = {
           title: postTitle.value.trim(),
@@ -396,28 +414,20 @@
 
         if (existingId) {
           draft.id = existingId;
+          if (existingDraft && existingDraft.slugNumber) {
+            draft.slugNumber = existingDraft.slugNumber;
+          }
         }
 
         try {
           await saveDraftToDB(draft);
           resetForm();
           await renderDrafts();
-          showStatus(existingId ? 'Draft updated in IndexedDB.' : 'Draft saved to IndexedDB.', 'success');
+          showStatus(existingId ? 'Draft updated.' : 'Draft saved.', 'success');
         } catch (err) {
           showStatus('Failed to save draft: ' + escapeHtml(err.message), 'error');
         }
       });
-
-      // Slugify + Markdown Generation
-      function slugify(title, fallbackId) {
-        const asciiSlug = String(title || '')
-          .toLowerCase()
-          .trim()
-          .replace(/[^\w\s-]/g, '')
-          .replace(/[\s_]+/g, '-')
-          .replace(/^-+|-+$/g, '');
-        return asciiSlug || ('post-' + (fallbackId || Date.now()));
-      }
 
       function escapeYamlString(val) {
         return String(val || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\r?\n/g, ' ');
@@ -439,27 +449,38 @@
         ].join('\n');
       }
 
-      // Maintain posts/index.json so index.html avoids GitHub API 60/hr rate limit
-      async function syncPostsManifest(owner, repo, branch, token, latestFilename) {
-        const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
-        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json`;
-
-        let filenames = [];
-        let manifestSha = null;
-
-        const listRes = await fetch(listUrl, {
+      async function ghFetchJson(url, token) {
+        const res = await fetch(url, {
           headers: {
             'Authorization': `Bearer ${token}`,
             'Accept': 'application/vnd.github+json'
-          }
+          },
+          cache: 'no-store'
         });
+        return res;
+      }
 
+      // Read posts/ directory + posts/index.json to determine next numeric slug & update compact manifest
+      async function getRepoPostState(owner, repo, branch, token) {
+        const listUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
+        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json?ref=${encodeURIComponent(branch)}`;
+
+        let maxNumber = 0;
+        let dirFiles = [];
+        let manifestEntries = [];
+        let manifestSha = null;
+
+        const listRes = await ghFetchJson(listUrl, token);
         if (listRes.ok) {
           const items = await listRes.json();
           if (Array.isArray(items)) {
             items.forEach(function (item) {
               if (item.type === 'file' && item.name.toLowerCase().endsWith('.md')) {
-                filenames.push(item.name);
+                dirFiles.push(item.name);
+                const m = item.name.match(/^(\d+)\.md$/i);
+                if (m) {
+                  maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
+                }
               } else if (item.name === 'index.json' && item.sha) {
                 manifestSha = item.sha;
               }
@@ -467,33 +488,71 @@
           }
         }
 
-        if (latestFilename && filenames.indexOf(latestFilename) === -1) {
-          filenames.push(latestFilename);
-        }
-
-        if (!manifestSha) {
-          const getManifestRes = await fetch(`${manifestUrl}?ref=${encodeURIComponent(branch)}`, {
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/vnd.github+json'
-            }
-          });
-          if (getManifestRes.ok) {
-            const existingManifest = await getManifestRes.json();
-            if (existingManifest && existingManifest.sha) {
-              manifestSha = existingManifest.sha;
-            }
+        const manRes = await ghFetchJson(manifestUrl, token);
+        if (manRes.ok) {
+          const manData = await manRes.json();
+          if (manData && manData.sha) manifestSha = manData.sha;
+          if (manData && manData.content) {
+            try {
+              const parsed = JSON.parse(base64ToUtf8(manData.content));
+              if (Array.isArray(parsed)) {
+                manifestEntries = parsed;
+                parsed.forEach(function (e) {
+                  if (typeof e === 'number') maxNumber = Math.max(maxNumber, e);
+                  else if (typeof e === 'string') {
+                    const m = e.match(/^(\d+)\.md$/i);
+                    if (m) maxNumber = Math.max(maxNumber, parseInt(m[1], 10));
+                  } else if (e && typeof e === 'object' && e.n != null) {
+                    maxNumber = Math.max(maxNumber, Number(e.n) || 0);
+                  }
+                });
+              }
+            } catch (_) { /* ignore malformed manifest */ }
           }
         }
 
-        const manifestJson = JSON.stringify(filenames, null, 2);
+        return { maxNumber, dirFiles, manifestEntries, manifestSha };
+      }
+
+      async function syncCompactManifest(owner, repo, branch, token, state, slugNum, postDateIso) {
+        const manifestUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts/index.json`;
+        const entryMap = new Map();
+
+        // Keep existing manifest entries (preserving their dates)
+        state.manifestEntries.forEach(function (e) {
+          if (typeof e === 'number') {
+            entryMap.set(`${e}.md`, { n: e });
+          } else if (typeof e === 'string' && e.toLowerCase().endsWith('.md')) {
+            const m = e.match(/^(\d+)\.md$/i);
+            entryMap.set(e, m ? { n: parseInt(m[1], 10) } : { f: e });
+          } else if (e && typeof e === 'object') {
+            const fname = e.n != null ? `${e.n}.md` : (e.f || e.file || '');
+            if (fname) entryMap.set(fname, e);
+          }
+        });
+
+        // Include any .md file in posts/ missing from manifest
+        state.dirFiles.forEach(function (fname) {
+          if (!entryMap.has(fname)) {
+            const m = fname.match(/^(\d+)\.md$/i);
+            entryMap.set(fname, m ? { n: parseInt(m[1], 10) } : { f: fname });
+          }
+        });
+
+        // Add/update newly published numeric post with compact { n, d }
+        entryMap.set(`${slugNum}.md`, { n: slugNum, d: postDateIso });
+
+        const list = Array.from(entryMap.values()).sort(function (a, b) {
+          return (Number(b.n) || 0) - (Number(a.n) || 0);
+        });
+
         const putBody = {
-          message: 'Update posts/index.json manifest',
-          content: btoa(unescape(encodeURIComponent(manifestJson))),
+          message: `Update index.json (#${slugNum})`,
+          content: utf8ToBase64(JSON.stringify(list)),
           branch: branch
         };
-        if (manifestSha) {
-          putBody.sha = manifestSha;
+        if (state.manifestSha) {
+          putBody.sha = state.manifestSha;
         }
 
         await fetch(manifestUrl, {
@@ -507,7 +566,7 @@
         });
       }
 
-      // Publish to GitHub REST API
+      // Publish to GitHub with Sequential Numeric Slug
       async function publishDraft(draft) {
         const token = ghToken.value.trim() || localStorage.getItem(GH_KEYS.token) || '';
         const owner = ghOwner.value.trim() || localStorage.getItem(GH_KEYS.owner) || DEFAULT_OWNER;
@@ -515,27 +574,21 @@
         const branch = ghBranch.value.trim() || localStorage.getItem(GH_KEYS.branch) || DEFAULT_BRANCH;
 
         if (!token || !owner || !repo) {
-          showStatus('Please paste your GitHub Personal Access Token in GitHub Publish Settings before publishing.', 'error');
+          showStatus('Please enter your GitHub Personal Access Token before publishing.', 'error');
           return;
         }
 
-        const slug = slugify(draft.title, draft.id);
-        const fileName = `${slug}.md`;
-        const filePath = `posts/${fileName}`;
-        const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
-
-        showStatus(`Publishing <strong>${escapeHtml(filePath)}</strong> to GitHub...`, 'info');
+        showStatus('Checking next numeric slug and publishing...', 'info');
 
         try {
-          let existingSha = null;
-          const getRes = await fetch(`${apiUrl}?ref=${encodeURIComponent(branch)}`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Accept': 'application/vnd.github+json'
-            }
-          });
+          const state = await getRepoPostState(owner, repo, branch, token);
+          const slugNum = draft.slugNumber ? Number(draft.slugNumber) : (state.maxNumber + 1);
+          const fileName = `${slugNum}.md`;
+          const filePath = `posts/${fileName}`;
+          const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${filePath}`;
 
+          let existingSha = null;
+          const getRes = await ghFetchJson(`${apiUrl}?ref=${encodeURIComponent(branch)}`, token);
           if (getRes.ok) {
             const existingData = await getRes.json();
             if (existingData && existingData.sha) {
@@ -546,20 +599,20 @@
             throw new Error(errJson.message || `GitHub GET error (${getRes.status})`);
           }
 
+          const publishDateIso = new Date().toISOString();
           const md = draftToMarkdown({
             title: draft.title,
-            date: new Date().toISOString(),
+            date: publishDateIso,
             category: draft.category,
             author: draft.author,
             image: draft.image,
             excerpt: draft.excerpt,
             content: draft.content
           });
-          const base64Content = btoa(unescape(encodeURIComponent(md)));
 
           const putPayload = {
-            message: `${existingSha ? 'Update' : 'Publish'} post: ${draft.title}`,
-            content: base64Content,
+            message: `${existingSha ? 'Update' : 'Publish'} #${slugNum}: ${draft.title}`,
+            content: utf8ToBase64(md),
             branch: branch
           };
           if (existingSha) {
@@ -581,20 +634,25 @@
             throw new Error(putData.message || `GitHub PUT error (${putRes.status})`);
           }
 
-          // Update posts/index.json for rate-limit-free front page loading
-          await syncPostsManifest(owner, repo, branch, token, fileName).catch(function () {});
+          // Remember slugNumber on draft in case user keeps it for edits
+          draft.slugNumber = slugNum;
+          await saveDraftToDB(draft);
+
+          await syncCompactManifest(owner, repo, branch, token, state, slugNum, publishDateIso).catch(function () {});
 
           const fileUrl = (putData.content && putData.content.html_url)
             ? putData.content.html_url
             : `https://github.com/${owner}/${repo}/blob/${branch}/${filePath}`;
 
           showStatus(
-            `Published successfully! File URL: <a href="${escapeHtml(fileUrl)}" target="_blank" class="underline font-semibold break-all">${escapeHtml(fileUrl)}</a>`,
+            `Published as <strong>${escapeHtml(filePath)}</strong>! <a href="${escapeHtml(fileUrl)}" target="_blank" class="underline font-semibold break-all">View on GitHub</a>`,
             'success'
           );
 
+          await renderDrafts();
+
           setTimeout(async function () {
-            if (confirm('Delete draft?')) {
+            if (confirm(`Published as ${fileName}. Delete local draft?`)) {
               await deleteDraftFromDB(draft.id);
               if (Number(draftIdInput.value) === draft.id) {
                 resetForm();
@@ -611,9 +669,7 @@
       async function renderDrafts() {
         try {
           const drafts = await getAllDrafts();
-          drafts.sort(function (a, b) {
-            return (b.id || 0) - (a.id || 0);
-          });
+          drafts.sort(function (a, b) { return (b.id || 0) - (a.id || 0); });
 
           draftCount.textContent = drafts.length + (drafts.length === 1 ? ' draft' : ' drafts');
 
@@ -625,29 +681,32 @@
 
           noDraftsMsg.classList.add('hidden');
           draftTableBody.innerHTML = drafts.map(function (d) {
-            const dateDisplay = d.date ? new Date(d.date).toLocaleString() : '—';
+            const dateDisplay = d.date ? new Date(d.date).toLocaleDateString() : '—';
+            const slugBadge = d.slugNumber
+              ? `<span class="text-xs font-mono bg-neutral-100 px-1.5 py-0.5 rounded-sm">#${d.slugNumber}.md</span>`
+              : `<span class="text-xs text-neutral-400">Auto #</span>`;
+
             return `
               <tr class="hover:bg-neutral-50">
-                <td class="py-3 px-3 font-semibold text-neutral-900">${escapeHtml(d.title)}</td>
-                <td class="py-3 px-3">
+                <td class="py-2.5 px-3 font-semibold text-neutral-900">${escapeHtml(d.title)}</td>
+                <td class="py-2.5 px-3">
                   <span class="text-xs font-bold uppercase text-red-600 bg-red-50 px-2 py-0.5 rounded-sm">${escapeHtml(d.category)}</span>
                 </td>
-                <td class="py-3 px-3 text-neutral-700">${escapeHtml(d.author || 'Staff Correspondent')}</td>
-                <td class="py-3 px-3 text-xs text-neutral-500 whitespace-nowrap">${escapeHtml(dateDisplay)}</td>
-                <td class="py-3 px-3 text-right whitespace-nowrap space-x-1.5">
-                  <button type="button" data-action="edit" data-id="${d.id}" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-900 text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Edit</button>
-                  <button type="button" data-action="publish" data-id="${d.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Publish to GitHub</button>
-                  <button type="button" data-action="delete" data-id="${d.id}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1.5 rounded-sm cursor-pointer">Delete</button>
+                <td class="py-2.5 px-3">${slugBadge}</td>
+                <td class="py-2.5 px-3 text-xs text-neutral-500 whitespace-nowrap">${escapeHtml(dateDisplay)}</td>
+                <td class="py-2.5 px-3 text-right whitespace-nowrap space-x-1.5">
+                  <button type="button" data-action="edit" data-id="${d.id}" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-900 text-xs font-semibold px-2.5 py-1 rounded-sm cursor-pointer">Edit</button>
+                  <button type="button" data-action="publish" data-id="${d.id}" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-2.5 py-1 rounded-sm cursor-pointer">${d.slugNumber ? 'Update' : 'Publish'}</button>
+                  <button type="button" data-action="delete" data-id="${d.id}" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold px-2.5 py-1 rounded-sm cursor-pointer">Delete</button>
                 </td>
               </tr>
             `;
           }).join('');
         } catch (err) {
-          showStatus('Failed to load drafts from IndexedDB: ' + escapeHtml(err.message), 'error');
+          showStatus('Failed to load drafts: ' + escapeHtml(err.message), 'error');
         }
       }
 
-      // Table Action Delegation
       draftTableBody.addEventListener('click', async function (e) {
         const btn = e.target.closest('button[data-action]');
         if (!btn) return;
@@ -668,17 +727,18 @@
           postImage.value = draft.image || '';
           postExcerpt.value = draft.excerpt || '';
           postContent.value = draft.content || '';
-          formHeading.textContent = 'Edit Draft #' + draft.id;
+          formHeading.textContent = draft.slugNumber ? `Edit Draft (Published #${draft.slugNumber})` : `Edit Draft #${draft.id}`;
           cancelEditBtn.classList.remove('hidden');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         } else if (action === 'publish') {
           btn.disabled = true;
+          const prevLabel = btn.textContent;
           btn.textContent = 'Publishing...';
           try {
             await publishDraft(draft);
           } finally {
             btn.disabled = false;
-            btn.textContent = 'Publish to GitHub';
+            btn.textContent = prevLabel;
           }
         } else if (action === 'delete') {
           if (confirm(`Delete draft "${draft.title}"?`)) {
@@ -687,7 +747,7 @@
               resetForm();
             }
             await renderDrafts();
-            showStatus('Draft deleted from IndexedDB.', 'info');
+            showStatus('Draft deleted.', 'info');
           }
         }
       });
