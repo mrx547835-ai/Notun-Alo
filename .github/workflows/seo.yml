@@ -1,0 +1,43 @@
+name: Build SEO Pages, Sitemap & RSS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'posts/**'
+      - 'index.html'
+      - '.github/scripts/build-seo.mjs'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  seo-build:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate sitemap.xml, robots.txt, rss.xml, and static post pages
+        run: node .github/scripts/build-seo.mjs
+
+      - name: Commit generated SEO files
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A robots.txt sitemap.xml rss.xml post
+          if ! git diff --cached --quiet; then
+            git commit -m "chore(seo): update sitemap, rss, and static post pages [skip ci]"
+            git push
+          else
+            echo "No SEO changes to commit."
+          fi
