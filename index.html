@@ -6,7 +6,10 @@
   <title>Notun Alo — Truth &amp; Trust</title>
   <meta id="metaDesc" name="description" content="Notun Alo — Trusted online news portal from Sylhet, Bangladesh covering National, Politics, Sports, Tech, and Entertainment." />
   <meta name="robots" content="index, follow" />
+  <meta name="theme-color" content="#dc2626" />
   <link id="canonicalLink" rel="canonical" href="./" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="manifest" href="manifest.json" />
   <link rel="alternate" type="application/rss+xml" title="Notun Alo RSS Feed" href="rss.xml" />
 
   <!-- Open Graph / Social Sharing -->
@@ -64,16 +67,29 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* Clean Dark Mode Overrides */
+    html.dark body { background-color: #0f0f11; color: #ececec; }
+    html.dark header, html.dark nav, html.dark footer { background-color: #16161a !important; border-color: #2c2c34 !important; }
+    html.dark .bg-neutral-100 { background-color: #1d1d22 !important; }
+    html.dark .bg-neutral-50 { background-color: #16161a !important; }
+    html.dark .bg-white { background-color: #16161a !important; }
+    html.dark .text-black, html.dark .text-neutral-900 { color: #f5f5f5 !important; }
+    html.dark .text-neutral-800, html.dark .text-neutral-700 { color: #d4d4d8 !important; }
+    html.dark .text-neutral-600, html.dark .text-neutral-500 { color: #a1a1aa !important; }
+    html.dark .border-black { border-color: #52525b !important; }
+    html.dark .border-neutral-200, html.dark .border-neutral-300 { border-color: #2c2c34 !important; }
+    html.dark input, html.dark textarea { background-color: #1d1d22 !important; color: #f5f5f5 !important; border-color: #3f3f46 !important; }
+    html.dark .hover\:bg-neutral-100:hover { background-color: #27272f !important; }
   </style>
 </head>
-<body class="bg-white text-neutral-900 min-h-screen flex flex-col">
+<body class="bg-white text-neutral-900 min-h-screen flex flex-col transition-colors duration-150">
 
   <!-- Header -->
   <header class="border-b-2 border-black bg-white">
     <div class="max-w-6xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-3">
       <div class="text-xs text-neutral-600 order-2 md:order-1 md:w-1/4 text-center md:text-left">
         <div id="liveDate" class="text-neutral-900 font-semibold"></div>
-        <div class="text-neutral-500">Github Edition • Online</div>
+        <div id="editionLabel" class="text-neutral-500">Sylhet Edition • Online</div>
       </div>
 
       <div class="order-1 md:order-2 text-center">
@@ -85,8 +101,10 @@
         </a>
       </div>
 
-      <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end w-full">
-        <input id="searchInput" type="search" aria-label="Search headlines" placeholder="Search headlines..." class="w-full max-w-xs border border-neutral-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-black" />
+      <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end gap-2 w-full">
+        <input id="searchInput" type="search" aria-label="Search headlines" placeholder="Search headlines..." class="w-full max-w-[200px] border border-neutral-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-black" />
+        <button id="langToggleBtn" type="button" title="Switch UI Language" class="shrink-0 text-xs font-semibold border border-neutral-300 hover:border-black px-2 py-1.5 rounded-sm cursor-pointer">বাং</button>
+        <button id="themeToggleBtn" type="button" title="Toggle Dark Mode" class="shrink-0 text-xs font-semibold border border-neutral-300 hover:border-black px-2 py-1.5 rounded-sm cursor-pointer">🌙</button>
       </div>
     </div>
 
@@ -106,7 +124,7 @@
   <!-- Breaking News Ticker -->
   <div class="bg-neutral-100 border-b border-neutral-300">
     <div class="max-w-6xl mx-auto px-4 flex items-center h-9 overflow-hidden">
-      <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 mr-3 shrink-0">Breaking</span>
+      <span id="breakingBadge" class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5 mr-3 shrink-0">Breaking</span>
       <div class="ticker-wrapper overflow-hidden flex-1 text-sm font-medium text-neutral-900">
         <div id="breakingTicker" class="ticker-track">
           <span class="mr-12">Notun Alo — Loading latest news...</span>
@@ -115,6 +133,9 @@
       </div>
     </div>
   </div>
+
+  <!-- Optional Header Ad Slot (Hidden unless configured) -->
+  <div id="adHeaderSlot" class="hidden max-w-6xl w-full mx-auto px-4 pt-4"></div>
 
   <!-- Main Content -->
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
@@ -149,7 +170,7 @@
       <section id="archiveSection" class="hidden mt-10 pt-6 border-t border-neutral-300">
         <div id="archiveListWrap" class="hidden mb-6">
           <div class="flex items-center justify-between mb-4 border-b border-neutral-300 pb-1.5">
-            <h2 class="font-editorial text-lg font-bold uppercase tracking-wide text-neutral-700">Older Posts (Archive)</h2>
+            <h2 id="archiveHeading" class="font-editorial text-lg font-bold uppercase tracking-wide text-neutral-700">Older Posts (Archive)</h2>
             <span id="archiveLoadedCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
           </div>
           <div id="archiveGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
@@ -166,24 +187,34 @@
     <!-- Full Article Page View -->
     <div id="articlePageView" class="hidden">
       <div class="max-w-3xl mx-auto">
-        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-5">
+        <div class="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-3 mb-5">
           <button id="backToHomeBtn" type="button" class="text-xs font-semibold uppercase tracking-wider text-neutral-700 hover:text-red-600 cursor-pointer">
             &larr; Back to News
           </button>
-          <div class="flex items-center gap-2">
-            <button id="shareArticleBtn" type="button" class="text-[11px] font-semibold uppercase tracking-wider border border-neutral-300 hover:border-black px-2 py-0.5 rounded-sm cursor-pointer">
-              Copy Link
-            </button>
+          <div class="flex items-center gap-1.5">
+            <button id="fontDownBtn" type="button" title="Decrease font size" class="text-[11px] font-bold border border-neutral-300 hover:border-black px-2 py-0.5 rounded-sm cursor-pointer">A-</button>
+            <button id="fontUpBtn" type="button" title="Increase font size" class="text-[11px] font-bold border border-neutral-300 hover:border-black px-2 py-0.5 rounded-sm cursor-pointer">A+</button>
             <button id="articleCategoryBtn" type="button" class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-sm cursor-pointer"></button>
           </div>
         </div>
 
         <article>
           <h1 id="articleTitle" class="font-editorial text-3xl sm:text-4xl font-bold text-black leading-tight mb-3"></h1>
-          <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-6">
-            <span>By <strong id="articleAuthor" class="text-neutral-900"></strong></span>
-            <span>•</span>
-            <time id="articleDate"></time>
+          <div class="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-5">
+            <div class="flex flex-wrap items-center gap-2.5">
+              <span>By <strong id="articleAuthor" class="text-neutral-900"></strong></span>
+              <span>•</span>
+              <time id="articleDate"></time>
+              <span>•</span>
+              <span id="articleReadTime"></span>
+            </div>
+            <!-- Social Share Buttons -->
+            <div class="flex items-center gap-1.5 text-[11px] font-semibold">
+              <a id="shareFb" target="_blank" rel="noopener noreferrer" class="bg-[#1877F2] text-white px-2 py-1 rounded-sm hover:opacity-90">Facebook</a>
+              <a id="shareWa" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white px-2 py-1 rounded-sm hover:opacity-90">WhatsApp</a>
+              <a id="shareX" target="_blank" rel="noopener noreferrer" class="bg-black text-white px-2 py-1 rounded-sm hover:opacity-80">X</a>
+              <button id="shareArticleBtn" type="button" class="border border-neutral-300 hover:border-black px-2 py-1 rounded-sm cursor-pointer">Copy Link</button>
+            </div>
           </div>
 
           <div id="articleImageWrap" class="hidden mb-6">
@@ -192,14 +223,20 @@
 
           <p id="articleExcerpt" class="text-base sm:text-lg font-semibold text-neutral-800 leading-relaxed mb-6 border-l-4 border-red-600 pl-4"></p>
 
-          <div id="articleBody" class="space-y-4 text-neutral-800 leading-relaxed text-base sm:text-[17px]"></div>
+          <!-- Optional In-Article Ad Slot -->
+          <div id="adArticleSlot" class="hidden my-6"></div>
+
+          <div id="articleBody" class="space-y-4 text-neutral-800 leading-relaxed"></div>
         </article>
+
+        <!-- Optional Comments (Giscus) -->
+        <div id="commentsSection" class="hidden mt-10 pt-6 border-t border-neutral-200"></div>
       </div>
 
       <!-- Related Content -->
       <section id="relatedSection" class="hidden mt-12 pt-6 border-t-2 border-black">
         <div class="flex items-center justify-between mb-5 border-b border-neutral-200 pb-2">
-          <h2 class="font-editorial text-xl font-bold uppercase tracking-wide text-black">Related Content</h2>
+          <h2 id="relatedHeading" class="font-editorial text-xl font-bold uppercase tracking-wide text-black">Related Content</h2>
           <span id="relatedSubtitle" class="text-xs font-semibold text-neutral-500 uppercase"></span>
         </div>
         <div id="relatedGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
@@ -244,6 +281,23 @@
         branch: localStorage.getItem('ds_gh_branch') || 'main'
       };
 
+      // Optional Integrations (leave empty unless you want to enable them)
+      const SITE_INTEGRATIONS = {
+        contactEmail: 'editorial@notunalo.com',
+        web3formsKey: '', // Paste free Web3Forms access key for AJAX contact form
+        giscus: {
+          enabled: false,
+          repo: '',       // e.g. 'mrx547835-ai/Notun-Alo'
+          repoId: '',
+          category: 'Announcements',
+          categoryId: ''
+        },
+        ads: {
+          headerHtml: '', // Optional HTML/AdSense snippet
+          articleHtml: ''
+        }
+      };
+
       const CACHE_DB_NAME = `NotunAloCache_${GH_CONFIG.owner}_${GH_CONFIG.repo}_${GH_CONFIG.branch}`;
       const CACHE_DB_VERSION = 1;
       const STORE_ARTICLES = 'articles';
@@ -253,6 +307,33 @@
       const FIRST_PAGE_SIZE = 7;
       const NEXT_PAGE_SIZE = 6;
       const ARCHIVE_BATCH_SIZE = 6;
+
+      const UI_TEXT = {
+        en: {
+          edition: 'Sylhet Edition • Online',
+          searchPlaceholder: 'Search headlines...',
+          breaking: 'Breaking',
+          featured: 'Featured',
+          moreNews: 'More News',
+          related: 'Related Content',
+          backToNews: '← Back to News',
+          loadOlder: 'Load Older Posts',
+          archiveTitle: 'Older Posts (Archive)',
+          cats: { All: 'All', National: 'National', Politics: 'Politics', Sports: 'Sports', Tech: 'Tech', Entertainment: 'Entertainment' }
+        },
+        bn: {
+          edition: 'সিলেট সংস্করণ • অনলাইন',
+          searchPlaceholder: 'শিরোনাম খুঁজুন...',
+          breaking: 'ব্রেকিং',
+          featured: 'প্রধান খবর',
+          moreNews: 'আরও খবর',
+          related: 'সম্পর্কিত খবর',
+          backToNews: '← সব খবরে ফিরুন',
+          loadOlder: 'পুরনো খবর দেখুন',
+          archiveTitle: 'পুরনো খবর (আর্কাইভ)',
+          cats: { All: 'সব', National: 'জাতীয়', Politics: 'রাজনীতি', Sports: 'খেলাধুলা', Tech: 'প্রযুক্তি', Entertainment: 'বিনোদন' }
+        }
+      };
 
       const DEFAULT_DESC = 'Notun Alo — Trusted online news portal from Sylhet, Bangladesh covering National, Politics, Sports, Tech, and Entertainment.';
 
@@ -327,21 +408,34 @@
           desc: 'Contact Notun Alo editorial desk for news tips, corrections, and feedback.',
           html: `
             <p>We welcome news tips, reader feedback, corrections, and general inquiries.</p>
-            <div class="bg-neutral-50 border border-neutral-200 rounded-sm p-5 space-y-2">
+            <div class="bg-neutral-50 border border-neutral-200 rounded-sm p-4 space-y-1.5 text-sm">
               <p><strong>Editorial Desk:</strong> Notun Alo, Sylhet, Bangladesh</p>
-              <p><strong>Email:</strong> <a href="mailto:editorial@notunalo.com" class="text-red-600 underline">editorial@notunalo.com</a></p>
-              <p><strong>Newsroom Hours:</strong> Saturday – Thursday, 9:00 AM – 8:00 PM (BST)</p>
+              <p><strong>Email:</strong> <a href="mailto:${SITE_INTEGRATIONS.contactEmail}" class="text-red-600 underline">${SITE_INTEGRATIONS.contactEmail}</a></p>
+              <p><strong>Hours:</strong> Saturday – Thursday, 9:00 AM – 8:00 PM (BST)</p>
             </div>
-            <p class="text-xs text-neutral-500">For urgent corrections, please include the article headline or link in your email.</p>
+            <form id="contactForm" class="space-y-3 pt-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input id="cName" type="text" required placeholder="Your Name" class="border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+                <input id="cEmail" type="email" required placeholder="Your Email" class="border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+              </div>
+              <input id="cSubject" type="text" required placeholder="Subject / News Tip Headline" class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black" />
+              <textarea id="cMsg" rows="4" required placeholder="Write your message..." class="w-full border border-neutral-300 rounded-sm px-3 py-2 text-sm focus:outline-none focus:border-black"></textarea>
+              <button type="submit" class="bg-red-600 hover:bg-red-700 text-white text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-sm cursor-pointer">Send Message</button>
+              <div id="contactStatus" class="hidden text-xs font-semibold pt-1"></div>
+            </form>
           `
         }
       };
 
       const liveDateEl = document.getElementById('liveDate');
+      const editionLabel = document.getElementById('editionLabel');
       const footerYearEl = document.getElementById('footerYear');
       const homeBrandLink = document.getElementById('homeBrandLink');
       const searchInput = document.getElementById('searchInput');
+      const langToggleBtn = document.getElementById('langToggleBtn');
+      const themeToggleBtn = document.getElementById('themeToggleBtn');
       const categoryBtns = document.querySelectorAll('.cat-btn');
+      const breakingBadge = document.getElementById('breakingBadge');
       const breakingTicker = document.getElementById('breakingTicker');
 
       const loadingState = document.getElementById('loadingState');
@@ -359,6 +453,7 @@
 
       const archiveSection = document.getElementById('archiveSection');
       const archiveListWrap = document.getElementById('archiveListWrap');
+      const archiveHeading = document.getElementById('archiveHeading');
       const archiveLoadedCount = document.getElementById('archiveLoadedCount');
       const archiveGrid = document.getElementById('archiveGrid');
       const loadArchiveWrap = document.getElementById('loadArchiveWrap');
@@ -366,16 +461,24 @@
 
       const articlePageView = document.getElementById('articlePageView');
       const backToHomeBtn = document.getElementById('backToHomeBtn');
+      const fontDownBtn = document.getElementById('fontDownBtn');
+      const fontUpBtn = document.getElementById('fontUpBtn');
+      const shareFb = document.getElementById('shareFb');
+      const shareWa = document.getElementById('shareWa');
+      const shareX = document.getElementById('shareX');
       const shareArticleBtn = document.getElementById('shareArticleBtn');
       const articleCategoryBtn = document.getElementById('articleCategoryBtn');
       const articleTitle = document.getElementById('articleTitle');
       const articleAuthor = document.getElementById('articleAuthor');
       const articleDate = document.getElementById('articleDate');
+      const articleReadTime = document.getElementById('articleReadTime');
       const articleImageWrap = document.getElementById('articleImageWrap');
       const articleImage = document.getElementById('articleImage');
       const articleExcerpt = document.getElementById('articleExcerpt');
       const articleBody = document.getElementById('articleBody');
+      const commentsSection = document.getElementById('commentsSection');
       const relatedSection = document.getElementById('relatedSection');
+      const relatedHeading = document.getElementById('relatedHeading');
       const relatedSubtitle = document.getElementById('relatedSubtitle');
       const relatedGrid = document.getElementById('relatedGrid');
 
@@ -391,6 +494,70 @@
       let searchQuery = '';
       let currentPage = 1;
       let currentShareUrl = '';
+      let uiLang = localStorage.getItem('na_ui_lang') || 'en';
+      let articleFontPx = Number(localStorage.getItem('na_font_px')) || 17;
+
+      function applyTheme(isDark) {
+        document.documentElement.classList.toggle('dark', isDark);
+        themeToggleBtn.textContent = isDark ? '☀️' : '🌙';
+      }
+      applyTheme(localStorage.getItem('na_dark') === 'true');
+
+      themeToggleBtn.addEventListener('click', function () {
+        const next = !document.documentElement.classList.contains('dark');
+        localStorage.setItem('na_dark', String(next));
+        applyTheme(next);
+      });
+
+      function applyUiLanguage() {
+        const t = UI_TEXT[uiLang] || UI_TEXT.en;
+        langToggleBtn.textContent = uiLang === 'en' ? 'বাং' : 'EN';
+        editionLabel.textContent = t.edition;
+        searchInput.placeholder = t.searchPlaceholder;
+        breakingBadge.textContent = t.breaking;
+        backToHomeBtn.textContent = t.backToNews;
+        staticBackBtn.textContent = t.backToNews;
+        relatedHeading.textContent = t.related;
+        archiveHeading.textContent = t.archiveTitle;
+        categoryBtns.forEach(function (btn) {
+          const cat = btn.getAttribute('data-category');
+          btn.textContent = t.cats[cat] || cat;
+        });
+        updateClock();
+      }
+
+      langToggleBtn.addEventListener('click', function () {
+        uiLang = uiLang === 'en' ? 'bn' : 'en';
+        localStorage.setItem('na_ui_lang', uiLang);
+        applyUiLanguage();
+        if (getRoute().type === 'home') renderHomeFeed();
+      });
+
+      function applyArticleFontSize() {
+        articleBody.style.fontSize = articleFontPx + 'px';
+      }
+      fontDownBtn.addEventListener('click', function () {
+        articleFontPx = Math.max(14, articleFontPx - 2);
+        localStorage.setItem('na_font_px', String(articleFontPx));
+        applyArticleFontSize();
+      });
+      fontUpBtn.addEventListener('click', function () {
+        articleFontPx = Math.min(24, articleFontPx + 2);
+        localStorage.setItem('na_font_px', String(articleFontPx));
+        applyArticleFontSize();
+      });
+
+      // Optional Ad Slots
+      if (SITE_INTEGRATIONS.ads.headerHtml) {
+        const el = document.getElementById('adHeaderSlot');
+        el.innerHTML = SITE_INTEGRATIONS.ads.headerHtml;
+        el.classList.remove('hidden');
+      }
+      if (SITE_INTEGRATIONS.ads.articleHtml) {
+        const el = document.getElementById('adArticleSlot');
+        el.innerHTML = SITE_INTEGRATIONS.ads.articleHtml;
+        el.classList.remove('hidden');
+      }
 
       function getBaseSiteUrl() {
         if (location.protocol === 'file:') return '';
@@ -452,7 +619,8 @@
 
       function updateClock() {
         const now = new Date();
-        liveDateEl.textContent = now.toLocaleDateString('en-US', {
+        const locale = uiLang === 'bn' ? 'bn-BD' : 'en-US';
+        liveDateEl.textContent = now.toLocaleDateString(locale, {
           weekday: 'long',
           year: 'numeric',
           month: 'long',
@@ -480,11 +648,17 @@
         if (!isoStr) return 'Recent';
         const d = new Date(isoStr);
         if (isNaN(d.getTime())) return isoStr;
-        return d.toLocaleDateString('en-US', {
+        return d.toLocaleDateString(uiLang === 'bn' ? 'bn-BD' : 'en-US', {
           year: 'numeric',
           month: 'short',
           day: 'numeric'
         });
+      }
+
+      function estimateReadTime(post) {
+        const words = ((post.excerpt || '') + ' ' + (post.content || '')).trim().split(/\s+/).filter(Boolean).length;
+        const mins = Math.max(1, Math.ceil(words / 200));
+        return uiLang === 'bn' ? `${mins} মি. পড়া` : `${mins} min read`;
       }
 
       function extractNumericSlug(filename) {
@@ -619,7 +793,9 @@
           date: '',
           category: 'National',
           author: 'Staff Correspondent',
-          image: ''
+          image: '',
+          breaking: 'false',
+          featured: 'false'
         };
 
         let bodyRaw = normalized;
@@ -651,6 +827,8 @@
           category: meta.category || 'National',
           author: meta.author || 'Staff Correspondent',
           image: sanitizeImageUrl(meta.image),
+          breaking: String(meta.breaking).toLowerCase() === 'true',
+          featured: String(meta.featured).toLowerCase() === 'true',
           excerpt: firstIdx < bodyLines.length ? bodyLines[firstIdx].trim() : '',
           content: bodyLines.slice(firstIdx + 1).join('\n').trim()
         };
@@ -672,7 +850,10 @@
           breakingTicker.innerHTML = `<span class="mr-12">${escapeHtml(fallback)}</span><span class="mr-12">${escapeHtml(fallback)}</span>`;
           return;
         }
-        const headlines = posts.slice(0, 6).map(function (p) {
+        const markedBreaking = posts.filter(function (p) { return p.breaking; });
+        const tickerSource = (markedBreaking.length > 0 ? markedBreaking : posts).slice(0, 6);
+
+        const headlines = tickerSource.map(function (p) {
           return `<button type="button" data-filename="${escapeHtml(p.filename)}" class="ticker-item hover:text-red-600 mr-10 cursor-pointer"><span class="text-red-600 font-bold mr-1.5">&#9632;</span>${escapeHtml(p.title)}</button>`;
         }).join('');
         breakingTicker.innerHTML = headlines + headlines;
@@ -687,6 +868,8 @@
       }
 
       function renderCardHtml(post, isArchive) {
+        const t = UI_TEXT[uiLang] || UI_TEXT.en;
+        const catLabel = t.cats[post.category] || post.category;
         const imgHtml = post.image
           ? `<img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" loading="lazy" class="w-full h-44 object-cover rounded-sm border border-neutral-200 mb-3" onerror="this.style.display='none'" />`
           : '';
@@ -695,7 +878,7 @@
           <article data-filename="${escapeHtml(post.filename)}" class="article-card group border-b border-neutral-200 pb-5 flex flex-col cursor-pointer">
             ${imgHtml}
             <div class="flex items-center gap-2 mb-1.5">
-              <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">${escapeHtml(post.category)}</span>
+              <span class="text-[11px] font-bold uppercase tracking-wider text-red-600">${escapeHtml(catLabel)}</span>
               <span class="text-neutral-300">•</span>
               <span class="text-xs text-neutral-500">${escapeHtml(formatDate(post.date))}</span>
               ${isArchive ? '<span class="ml-auto text-[10px] uppercase font-semibold bg-neutral-200 text-neutral-700 px-1.5 py-0.5 rounded-sm">Archive</span>' : ''}
@@ -706,7 +889,10 @@
             <p class="text-sm text-neutral-600 line-clamp-3 mb-2 flex-1">
               ${escapeHtml(post.excerpt || post.content.slice(0, 140))}
             </p>
-            <div class="text-xs text-neutral-500">By <span class="text-neutral-800 font-medium">${escapeHtml(post.author)}</span></div>
+            <div class="text-xs text-neutral-500 flex items-center justify-between">
+              <span>By <span class="text-neutral-800 font-medium">${escapeHtml(post.author)}</span></span>
+              <span>${escapeHtml(estimateReadTime(post))}</span>
+            </div>
           </article>
         `;
       }
@@ -773,6 +959,7 @@
       }
 
       function renderHomeFeed() {
+        const t = UI_TEXT[uiLang] || UI_TEXT.en;
         const filteredFresh = filterPosts(freshPosts);
         const filteredArchive = filterPosts(archiveLoadedPosts);
 
@@ -797,26 +984,22 @@
         }
 
         if (filteredFresh.length > 0) {
+          // Promote explicitly marked featured post (if any) to Hero without duplicating in grid
+          const featuredMatch = filteredFresh.find(function (p) { return p.featured; });
+          const heroPost = featuredMatch || filteredFresh[0];
+          const remainingPool = filteredFresh.filter(function (p) { return p.filename !== heroPost.filename; });
+
           const totalFresh = filteredFresh.length;
-          const totalPages = totalFresh <= FIRST_PAGE_SIZE
+          const totalPages = remainingPool.length <= (FIRST_PAGE_SIZE - 1)
             ? 1
-            : 1 + Math.ceil((totalFresh - FIRST_PAGE_SIZE) / NEXT_PAGE_SIZE);
+            : 1 + Math.ceil((remainingPool.length - (FIRST_PAGE_SIZE - 1)) / NEXT_PAGE_SIZE);
 
           if (currentPage > totalPages) currentPage = totalPages;
           if (currentPage < 1) currentPage = 1;
 
-          let heroPost = null;
           let gridPosts = [];
-
           if (currentPage === 1) {
-            heroPost = filteredFresh[0];
-            gridPosts = filteredFresh.slice(1, FIRST_PAGE_SIZE);
-          } else {
-            const start = FIRST_PAGE_SIZE + (currentPage - 2) * NEXT_PAGE_SIZE;
-            gridPosts = filteredFresh.slice(start, start + NEXT_PAGE_SIZE);
-          }
-
-          if (heroPost) {
+            gridPosts = remainingPool.slice(0, FIRST_PAGE_SIZE - 1);
             const heroImgHtml = heroPost.image
               ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
               : `<div class="w-full h-64 sm:h-80 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Notun Alo</div>`;
@@ -826,8 +1009,8 @@
                 <div class="lg:col-span-7 overflow-hidden">${heroImgHtml}</div>
                 <div class="lg:col-span-5 flex flex-col justify-center">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5">${escapeHtml(heroPost.category)}</span>
-                    <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Featured</span>
+                    <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5">${escapeHtml(t.cats[heroPost.category] || heroPost.category)}</span>
+                    <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">${escapeHtml(t.featured)}</span>
                   </div>
                   <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-black group-hover:text-red-600 transition leading-tight mb-3">
                     ${escapeHtml(heroPost.title)}
@@ -839,16 +1022,21 @@
                     <span class="text-neutral-800 font-semibold">${escapeHtml(heroPost.author)}</span>
                     <span>•</span>
                     <span>${escapeHtml(formatDate(heroPost.date))}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(estimateReadTime(heroPost))}</span>
                   </div>
                 </div>
               </article>
             `;
             heroSection.classList.remove('hidden');
+          } else {
+            const start = (FIRST_PAGE_SIZE - 1) + (currentPage - 2) * NEXT_PAGE_SIZE;
+            gridPosts = remainingPool.slice(start, start + NEXT_PAGE_SIZE);
           }
 
           if (gridPosts.length > 0) {
-            const baseLabel = selectedCategory === 'All' ? 'More News' : selectedCategory + ' News';
-            sectionHeading.textContent = totalPages > 1 ? `${baseLabel} (Page ${currentPage}/${totalPages})` : baseLabel;
+            const baseLabel = selectedCategory === 'All' ? t.moreNews : (t.cats[selectedCategory] || selectedCategory);
+            sectionHeading.textContent = totalPages > 1 ? `${baseLabel} (${currentPage}/${totalPages})` : baseLabel;
             postCount.textContent = totalFresh + (totalFresh === 1 ? ' Article' : ' Articles');
             postsGrid.innerHTML = gridPosts.map(function (p) { return renderCardHtml(p, false); }).join('');
             gridSection.classList.remove('hidden');
@@ -869,7 +1057,7 @@
 
           if (archiveQueue.length > 0) {
             loadArchiveWrap.classList.remove('hidden');
-            loadArchiveBtn.textContent = `Load Older Posts (${archiveQueue.length} archived)`;
+            loadArchiveBtn.textContent = `${t.loadOlder} (${archiveQueue.length})`;
           } else {
             loadArchiveWrap.classList.add('hidden');
           }
@@ -896,7 +1084,32 @@
         };
       }
 
+      function mountGiscusIfConfigured(postSlug) {
+        const g = SITE_INTEGRATIONS.giscus;
+        if (!g.enabled || !g.repo || !g.repoId || !g.categoryId) {
+          commentsSection.classList.add('hidden');
+          commentsSection.innerHTML = '';
+          return;
+        }
+        commentsSection.classList.remove('hidden');
+        commentsSection.innerHTML = '';
+        const s = document.createElement('script');
+        s.src = 'https://giscus.app/client.js';
+        s.setAttribute('data-repo', g.repo);
+        s.setAttribute('data-repo-id', g.repoId);
+        s.setAttribute('data-category', g.category || 'Announcements');
+        s.setAttribute('data-category-id', g.categoryId);
+        s.setAttribute('data-mapping', 'specific');
+        s.setAttribute('data-term', `post-${postSlug}`);
+        s.setAttribute('data-reactions-enabled', '1');
+        s.setAttribute('data-theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        s.setAttribute('crossorigin', 'anonymous');
+        s.async = true;
+        commentsSection.appendChild(s);
+      }
+
       function renderArticlePage(post) {
+        const t = UI_TEXT[uiLang] || UI_TEXT.en;
         const slug = postToSlug(post);
         const base = getBaseSiteUrl();
         const seoUrl = base ? `${base}post/${encodeURIComponent(slug)}.html` : location.href;
@@ -916,12 +1129,17 @@
         articlePageView.classList.remove('hidden');
 
         shareArticleBtn.textContent = 'Copy Link';
-        articleCategoryBtn.textContent = post.category;
+        shareFb.href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(seoUrl)}`;
+        shareWa.href = `https://wa.me/?text=${encodeURIComponent(post.title + ' — ' + seoUrl)}`;
+        shareX.href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(seoUrl)}`;
+
+        articleCategoryBtn.textContent = t.cats[post.category] || post.category;
         articleCategoryBtn.setAttribute('data-cat', post.category);
         articleTitle.textContent = post.title;
         articleAuthor.textContent = post.author;
         articleDate.textContent = formatDate(post.date);
         articleDate.setAttribute('datetime', post.date || '');
+        articleReadTime.textContent = estimateReadTime(post);
 
         if (post.image) {
           articleImage.src = post.image;
@@ -939,6 +1157,7 @@
           articleExcerpt.classList.add('hidden');
         }
 
+        applyArticleFontSize();
         const paragraphs = (post.content || '').split(/\n\s*\n/).filter(function (p) { return p.trim() !== ''; });
         if (paragraphs.length === 0 && !post.excerpt) {
           articleBody.innerHTML = '<p class="text-neutral-500 italic">No additional content.</p>';
@@ -948,9 +1167,11 @@
           }).join('');
         }
 
+        mountGiscusIfConfigured(slug);
+
         const related = getRelatedPosts(post, 3);
         if (related.items.length > 0) {
-          relatedSubtitle.textContent = related.sameCategoryCount > 0 ? `More in ${post.category}` : 'Latest Stories';
+          relatedSubtitle.textContent = related.sameCategoryCount > 0 ? (t.cats[post.category] || post.category) : '';
           relatedGrid.innerHTML = related.items.map(function (p) { return renderCardHtml(p, false); }).join('');
           bindCardClicks(relatedGrid);
           relatedSection.classList.remove('hidden');
@@ -960,6 +1181,55 @@
         }
 
         window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      function bindContactForm() {
+        const form = document.getElementById('contactForm');
+        if (!form) return;
+        form.addEventListener('submit', async function (e) {
+          e.preventDefault();
+          const name = document.getElementById('cName').value.trim();
+          const email = document.getElementById('cEmail').value.trim();
+          const subject = document.getElementById('cSubject').value.trim();
+          const message = document.getElementById('cMsg').value.trim();
+          const status = document.getElementById('contactStatus');
+
+          if (SITE_INTEGRATIONS.web3formsKey) {
+            status.textContent = 'Sending...';
+            status.className = 'text-xs font-semibold pt-1 text-neutral-600';
+            status.classList.remove('hidden');
+            try {
+              const res = await fetch('https://api.web3forms.com/submit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  access_key: SITE_INTEGRATIONS.web3formsKey,
+                  name: name,
+                  email: email,
+                  subject: `[Notun Alo] ${subject}`,
+                  message: message
+                })
+              });
+              const data = await res.json();
+              if (data.success) {
+                form.reset();
+                status.textContent = 'Message sent successfully. Thank you!';
+                status.className = 'text-xs font-semibold pt-1 text-emerald-700';
+              } else {
+                throw new Error(data.message || 'Send failed');
+              }
+            } catch (err) {
+              status.textContent = 'Error: ' + err.message;
+              status.className = 'text-xs font-semibold pt-1 text-red-600';
+            }
+          } else {
+            const mailtoUrl = `mailto:${SITE_INTEGRATIONS.contactEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(`From: ${name} (${email})\n\n${message}`)}`;
+            location.href = mailtoUrl;
+            status.textContent = 'Opening your email app...';
+            status.className = 'text-xs font-semibold pt-1 text-neutral-700';
+            status.classList.remove('hidden');
+          }
+        });
       }
 
       function renderStaticPage(pageKey) {
@@ -978,6 +1248,7 @@
         staticPageTitle.textContent = page.title;
         staticPageBody.innerHTML = page.html;
         staticPageView.classList.remove('hidden');
+        if (pageKey === 'contact') bindContactForm();
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
@@ -1306,7 +1577,7 @@
         if (archiveQueue.length === 0) return;
 
         loadArchiveBtn.disabled = true;
-        loadArchiveBtn.textContent = 'Loading older posts...';
+        loadArchiveBtn.textContent = 'Loading...';
 
         const batch = archiveQueue.splice(0, ARCHIVE_BATCH_SIZE);
         const results = await Promise.allSettled(
@@ -1382,7 +1653,11 @@
       window.addEventListener('hashchange', handleRouteChange);
       window.addEventListener('popstate', handleRouteChange);
 
-      updateClock();
+      if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+        navigator.serviceWorker.register('./sw.js').catch(function () {});
+      }
+
+      applyUiLanguage();
       initAndSyncPosts();
     })();
   </script>
