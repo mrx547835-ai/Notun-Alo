@@ -1,28 +1,23 @@
 # Notun Alo — Serverless News Portal
 
-A lightweight, fast, SEO-friendly, serverless news portal built with plain HTML, Tailwind CSS, IndexedDB, and GitHub as a backend CMS. It supports both **English** and **বাংলা (Bengali)** articles with zero server or database hosting costs.
+A fast, minimal, SEO-friendly, installable (PWA) serverless news portal built with HTML, Tailwind CSS, IndexedDB, and GitHub as a backend CMS. Supports **English** and **বাংলা (Bengali)** with zero server or database hosting cost.
 
 ---
 
 ## Features
 
-- **Zero Backend / Free Hosting:** Runs completely on GitHub Pages (or any static host).
-- **Sequential Numeric Slugs:** Published articles are automatically saved as `posts/1.md`, `posts/2.md`, `posts/3.md`, etc. (prevents filename issues with Bengali headlines).
-- **Minimal Data Usage (Reader IndexedDB Cache):**
-  - Returning readers load cached articles instantly from their browser's IndexedDB (`NotunAloCache_*`).
-  - Only checks `posts/index.json` and downloads **brand-new** or **edited** (`v` incremented) posts.
-- **6-Month Auto-Cleanup & On-Demand Archive:**
-  - Articles older than 6 months are automatically removed from the reader's IndexedDB.
-  - Older articles are never auto-downloaded—readers can load them in batches of 6 via **Load Older Posts**.
-- **Full Article Pages, Clean URLs & Related Content:**
-  - Clicking any headline opens a full article page (`?post=<number>` on live hosting, `#post=<number>` locally) with up to 3 related stories underneath and a **Copy Link** button.
-- **Pagination, Search & Categories:** Paginated home feed (7 posts on page 1, 6 per page after), live headline search, and category filtering (`National`, `Politics`, `Sports`, `Tech`, `Entertainment`).
-- **Built-in Info Pages:** Footer links for **About**, **Terms**, **Privacy**, **Disclaimer**, **FAQ**, and **Contact** (`#page=...`) plus the **Admin Panel** link (removed from the header for a cleaner layout).
-- **Automated SEO, Social Previews & 404 Page:**
-  - Custom `404.html` with GitHub Pages nested-path support.
-  - Dynamic `<title>`, `<meta description>`, Open Graph, Twitter Cards, and JSON-LD (`NewsArticle` / `WebSite`) in `index.html`.
-  - GitHub Actions workflow automatically builds static `post/<n>.html` pages (for Google, Facebook, and WhatsApp previews), `sitemap.xml`, `robots.txt`, and `rss.xml`.
-- **Full Admin Desk (`admin.html`):** Draft management in IndexedDB, plus publish, edit, and delete support for live GitHub posts (`noindex, nofollow`).
+- **Zero Backend / Free Hosting:** Runs completely on GitHub Pages.
+- **GitHub PAT Authentication (`admin.html`):** No hardcoded password—authenticates directly with your GitHub Personal Access Token and verifies write access to your repository.
+- **Direct Image Upload (`admin.html`):** Compresses images in-browser (WebP/JPEG, max 1200px) and uploads them to `images/<n>.webp` on GitHub automatically.
+- **Sequential Numeric Slugs:** Published posts are saved as `posts/1.md`, `posts/2.md`, etc.
+- **Breaking & Featured Controls + Auto-Save + Preview:** Pin any story as Breaking or Featured Hero, auto-save typing in `localStorage`, and preview before publishing.
+- **Minimal Data Usage (Reader IndexedDB Cache):** Returning visitors render instantly from IndexedDB (`NotunAloCache_*`) and only download brand-new or edited (`v` bumped) posts.
+- **6-Month Auto-Cleanup & On-Demand Archive:** Posts older than 6 months are purged from reader IndexedDB and loaded in batches of 6 via **Load Older Posts**.
+- **Full Article Pages, Related Content & Social Sharing:** Includes Reading Time, `A- / A+` font controls, Facebook/WhatsApp/X/Copy Link sharing, and up to 3 Related Stories.
+- **Dark Mode & `বাং / EN` UI Toggle:** Saved in reader `localStorage`.
+- **PWA Offline App:** Installable via `manifest.json` + `sw.js`.
+- **Automated SEO & Telegram Broadcast:** GitHub Actions generates `post/<n>.html`, `sitemap.xml`, `robots.txt`, `rss.xml`, and optionally posts new stories to a Telegram channel.
+- **Built-in Info Pages & Contact Form:** About, Terms, Privacy, Disclaimer, FAQ, and Contact (`#page=...`) in the footer alongside the `Admin Panel` link.
 
 ---
 
@@ -30,164 +25,61 @@ A lightweight, fast, SEO-friendly, serverless news portal built with plain HTML,
 
 ```text
 Notun-Alo/
-├── index.html                        # Public newspaper front page & reader cache
-├── admin.html                        # Editorial admin panel (drafts + GitHub publisher)
+├── index.html                        # Public newspaper front page + reader cache
+├── admin.html                        # Editorial admin panel (GitHub PAT login)
 ├── 404.html                          # Custom GitHub Pages 404 page
+├── manifest.json                     # PWA manifest
+├── icon.svg                          # App icon / favicon
+├── sw.js                             # PWA Service Worker (offline shell)
 ├── robots.txt                        # Auto-generated by GitHub Actions
-├── sitemap.xml                       # Auto-generated by GitHub Actions
-├── rss.xml                           # Auto-generated RSS 2.0 feed (latest 20 posts)
+├── sitemap.xml                       # Auto-generated XML sitemap
+├── rss.xml                           # Auto-generated RSS 2.0 feed
 ├── README.md                         # Documentation
 ├── .github/
 │   ├── workflows/
-│   │   └── seo.yml                   # Automated SEO build workflow
+│   │   └── seo.yml                   # SEO & Telegram GitHub Action
 │   └── scripts/
-│       └── build-seo.mjs             # Zero-dependency Node.js SEO generator
-├── post/                             # Auto-generated static SEO article pages
-│   ├── 1.html
-│   └── 2.html
-└── posts/                            # Auto-created when you publish your first article
-    ├── index.json                    # Compact manifest: [{"n":2,"d":"...","v":1}, {"n":1,"d":"..."}]
-    ├── 1.md
-    └── 2.md
+│       └── build-seo.mjs             # Zero-dependency SEO & Telegram script
+├── images/                           # Uploaded compressed post images
+├── post/                             # Auto-generated static SEO pages (1.html, 2.html, ...)
+└── posts/                            # Source Markdown posts + index.json manifest
 ```
 
 ---
 
 ## Setup Tutorial
 
-### Step 1: Create a Public GitHub Repository
-1. Create a **Public** repository on GitHub (for example: `Notun-Alo`).
-   > **Important:** The repository **must be Public** so visitors can read `posts/index.json` and `posts/*.md` without needing authentication.
-2. Upload `index.html`, `admin.html`, `404.html`, `.github/workflows/seo.yml`, and `.github/scripts/build-seo.mjs` to your repository.
+### 1. Create a Public GitHub Repository
+Create a **Public** repository on GitHub (e.g. `Notun-Alo`) and upload all project files (`index.html`, `admin.html`, `404.html`, `manifest.json`, `icon.svg`, `sw.js`, `.github/workflows/seo.yml`, `.github/scripts/build-seo.mjs`, `README.md`).
 
-### Step 2: Update Default Repo Settings (If Using Your Own Repo)
-By default, `index.html` and `admin.html` point to:
-- **Owner:** `mrx547835-ai`
-- **Repo:** `Notun-Alo`
-- **Branch:** `main`
+### 2. Update Repo Defaults (If Using Your Own Repo)
+If your GitHub username or repository name is different from `mrx547835-ai/Notun-Alo`:
+1. Update `GH_CONFIG` in **`index.html`**.
+2. Update `DEFAULT_OWNER`, `DEFAULT_REPO`, `DEFAULT_BRANCH` (and default input values) in **`admin.html`**.
 
-If you deploy under a different GitHub username, repository name, or branch:
-1. Open **`index.html`** and update `GH_CONFIG`:
-   ```js
-   const GH_CONFIG = {
-     owner: localStorage.getItem('ds_gh_owner') || 'YOUR_GITHUB_USERNAME',
-     repo: localStorage.getItem('ds_gh_repo') || 'YOUR_REPO_NAME',
-     branch: localStorage.getItem('ds_gh_branch') || 'main'
-   };
-   ```
-   *(Updating this directly in `index.html` is required so all public visitors read from your repository.)*
-2. Open **`admin.html`** and update `DEFAULT_OWNER`, `DEFAULT_REPO`, and `DEFAULT_BRANCH`.
+### 3. Enable GitHub Pages & Actions Write Permissions
+1. **Pages:** Repository **Settings → Pages → Build and deployment → Source: Deploy from a branch** → select `main` and `/ (root)` → **Save**.
+2. **Actions:** Repository **Settings → Actions → General → Workflow permissions** → choose **Read and write permissions** → **Save**.
+3. Run the workflow once via **Actions → Build SEO Pages, Sitemap, RSS & Telegram → Run workflow**.
 
-### Step 3: Customize Branding, Contact Info & Admin Login (Recommended)
-1. **Change Admin Login (`admin.html`):**
-   Find the login check in `admin.html` and change `admin` / `1234` to your preferred username and password:
-   ```js
-   if (loginUser.value.trim() === 'admin' && loginPass.value === '1234')
-   ```
-   Also ensure `<meta name="robots" content="noindex, nofollow" />` is inside `<head>` of `admin.html` so search engines do not index the admin panel.
-   > **Note:** Client-side login is only a basic UI lock. Real security comes from keeping your GitHub Personal Access Token private.
-2. **Update Contact & Static Pages (`index.html`):**
-   Edit the `STATIC_PAGES` object in `index.html` to set your real email address (default placeholder: `editorial@notunalo.com`) and customize your About, Terms, Privacy, Disclaimer, and FAQ text.
+### 4. Generate a GitHub Personal Access Token (PAT)
+1. Go to GitHub **Settings → Developer settings → Personal access tokens → Fine-grained tokens → Generate new token**.
+2. Under **Repository access**, select **Only select repositories** → pick your repository.
+3. Under **Repository permissions**, set **Contents** to **Read and write**.
+4. Copy the generated token.
 
-### Step 4: Enable GitHub Pages & Actions Permissions
-1. **Enable GitHub Pages:**
-   - Go to **Settings → Pages → Build and deployment → Source** → select **Deploy from a branch**.
-   - Choose **`main`** and **`/ (root)`**, then click **Save**.
-2. **Enable Workflow Write Permissions (for SEO automation):**
-   - Go to **Settings → Actions → General → Workflow permissions**.
-   - Select **Read and write permissions** and click **Save**.
-3. **Run Initial SEO Build:**
-   - Go to the **Actions** tab → **Build SEO Pages, Sitemap & RSS** → click **Run workflow**.
-   - This generates `robots.txt`, `sitemap.xml`, `rss.xml`, and `post/*.html`. From now on, it runs automatically whenever posts are published, edited, or deleted.
-
-Your live URLs will be:
-- **Front Page:** `https://<username>.github.io/<repo>/`
-- **Admin Panel:** `https://<username>.github.io/<repo>/admin.html` (linked in the footer as **Admin Panel**)
-- **Sitemap:** `https://<username>.github.io/<repo>/sitemap.xml`
-- **RSS Feed:** `https://<username>.github.io/<repo>/rss.xml`
-
-*(Optional: Submit your `sitemap.xml` URL in Google Search Console for faster indexing.)*
-
-### Step 5: Generate a GitHub Personal Access Token (PAT)
-To allow `admin.html` to create, edit, and delete files in your repository:
-1. Go to GitHub **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens** → **Generate new token**.
-2. Give it a name (e.g., `Notun Alo Admin`) and set an expiration.
-3. Under **Repository access**, select **Only select repositories** and choose your news repository.
-4. Under **Repository permissions**, set **Contents** to **Read and write**.
-5. Click **Generate token** and copy the token immediately.
-   > **Never paste or commit your token into `admin.html` or any repository file.**
-
-### Step 6: Connect the Admin Panel
-1. Open `admin.html` (via the **Admin Panel** link in the footer).
-2. Sign in with your admin username and password (`admin` / `1234` by default).
-3. In **GitHub Publish Settings**:
-   - Paste your **Personal Access Token**.
-   - Verify **Owner**, **Repository**, and **Branch**.
-   - Click **Save Settings**.
-   *(Settings are saved locally in your browser's `localStorage`.)*
+### 5. Optional Integrations
+- **Telegram Auto-Post:** Add `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` in **Settings → Secrets and variables → Actions**. Every newly published post will automatically be sent to your Telegram channel/group.
+- **Contact Form (`index.html`):** Paste a free Web3Forms key into `SITE_INTEGRATIONS.web3formsKey` (otherwise it falls back to opening the visitor's email app).
+- **Comments (`index.html`):** Enable GitHub Discussions on your repo and fill `SITE_INTEGRATIONS.giscus` (`enabled: true`, `repo`, `repoId`, `categoryId`).
+- **Ads (`index.html`):** Paste AdSense or custom HTML into `SITE_INTEGRATIONS.ads.headerHtml` / `articleHtml`.
 
 ---
 
 ## Operation Tutorial
 
-### 1. Writing & Saving a Draft
-1. Log in to `admin.html`.
-2. Fill in the **Write New Draft** form:
-   - **Headline** *(required)*
-   - **Category** *(National, Politics, Sports, Tech, Entertainment)*
-   - **Author** *(defaults to `Staff Correspondent` if left blank)*
-   - **Image URL** *(optional `https://...` image link)*
-   - **Excerpt** *(required one-line summary)*
-   - **Article Content** *(required; separate paragraphs with blank lines)*
-3. Click **Save Draft**.
-   - Drafts are saved locally in your browser (`NewspaperDB` IndexedDB) and are **not** visible to readers until published.
-
-### 2. Publishing an Article
-1. In the **Saved Drafts** table, click **Publish** next to a draft.
-2. The admin panel automatically:
-   - Assigns the next sequential number (`1.md`, `2.md`, …).
-   - Uploads `posts/<n>.md` to GitHub.
-   - Updates `posts/index.json` with `{ "n": <number>, "d": "<ISO date>" }`.
-   - Triggers the GitHub Actions SEO workflow to build `post/<n>.html` and update `sitemap.xml` and `rss.xml`.
-3. Choose **OK** when prompted to delete the local draft, or **Cancel** if you want to keep it locally for quick updates.
-
-### 3. Editing a Published Article
-1. Scroll to **Published Posts (GitHub)** in `admin.html` (loads 10 posts at a time; click **Load More** or **Refresh** as needed).
-2. Click **Edit** on the article you want to modify.
-3. Edit the fields and click **Update Published Post**.
-   - Original publish date is preserved.
-   - Version `v` in `posts/index.json` is incremented so returning readers automatically fetch the updated version.
-   - The SEO workflow automatically updates `post/<n>.html`, `sitemap.xml`, and `rss.xml`.
-
-### 4. Deleting a Published Article
-1. In **Published Posts (GitHub)**, click **Delete** on the article and confirm.
-2. `posts/<n>.md` is deleted from GitHub and removed from `posts/index.json`.
-3. Returning readers' caches drop the article on their next visit, and the SEO workflow removes the corresponding `post/<n>.html` file and updates `sitemap.xml`.
-
----
-
-## How Reader Caching & SEO Work Together
-
-1. **Fast Reader Experience (`index.html`):**
-   - **First Visit:** Fetches `posts/index.json`, downloads only articles from the **last 6 months**, and caches them in IndexedDB (`NotunAloCache_*`).
-   - **Repeat Visits:** Renders cached articles immediately, deletes any cached articles older than 6 months, and only downloads newly published or edited (`v` bumped) posts.
-   - **Archive (> 6 Months Old):** Older articles are queued and only fetched (6 at a time) when the reader clicks **Load Older Posts**, or when opening a direct article link.
-2. **Search Engines & Social Media (`post/<n>.html`):**
-   - When readers click **Copy Link** on an article, it copies the static SEO URL (`post/<n>.html`) so Facebook, WhatsApp, and X/Twitter display the exact headline, description, and thumbnail image, and Google indexes full static HTML with `NewsArticle` schema.
-
----
-
-## Troubleshooting
-
-- **GitHub Actions SEO workflow fails with permission error (`403`):**
-  Go to **Settings → Actions → General → Workflow permissions**, enable **Read and write permissions**, save, and re-run the workflow.
-- **Published post doesn't appear immediately on the front page:**
-  GitHub's `raw.githubusercontent.com` edge cache can take 1–5 minutes to reflect a brand-new commit. Hard-refresh (`Ctrl + Shift + R`) after a minute.
-- **`GitHub Publish Error` / `401` / `403` / `404` in Admin:**
-  - Verify your **Personal Access Token** hasn't expired and has **Contents: Read and write** permission on the repository.
-  - Check that **Owner**, **Repository**, and **Branch** match GitHub exactly (case-sensitive).
-- **Front page shows "Could not load posts from GitHub":**
-  - Ensure the repository is **Public**.
-  - Check that `GH_CONFIG` in `index.html` matches your actual GitHub owner/repo/branch.
-- **Images not showing or missing from social previews:**
-  Only `https://` and `http://` (and `data:image/` in-browser) URLs are accepted. For Open Graph (`og:image`) previews on Facebook/WhatsApp, use a direct public `https://` image URL.
+1. **Sign In (`admin.html`):** Click **Admin Panel** in the footer, paste your GitHub Personal Access Token, verify Owner/Repo/Branch, and click **Verify & Sign In**.
+2. **Write & Upload Image:** Fill Headline, Category, Author, Excerpt, and Content. Click **Upload** to auto-compress and attach an image from your device (or paste an `https://` URL). Check **Breaking News Ticker** or **Featured Hero Story** if needed.
+3. **Preview & Save Draft:** Click **Preview** to check layout, or **Save Draft** to store locally in IndexedDB.
+4. **Publish:** Click **Publish** on a draft—images upload to `images/<n>.webp`, markdown uploads to `posts/<n>.md`, and `posts/index.json` updates automatically.
+5. **Edit / Delete Live Posts:** Use the **Published Posts (GitHub)** section at the bottom of `admin.html` to edit or delete live articles (also cleans up uploaded images and updates `post/*.html` & `sitemap.xml` via GitHub Actions).
