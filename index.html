@@ -48,7 +48,7 @@
       </div>
 
       <div class="order-1 md:order-2 text-center">
-        <a href="index.html" class="inline-block">
+        <a id="homeBrandLink" href="index.html" class="inline-block">
           <h1 class="font-editorial text-4xl md:text-5xl font-extrabold tracking-tight text-black">
             Notun <span class="text-red-600">Alo</span>
           </h1>
@@ -94,66 +94,84 @@
   <main class="flex-1 max-w-6xl w-full mx-auto px-4 py-6">
     <div id="loadingState" class="hidden py-14 text-center">
       <div class="inline-block w-7 h-7 border-4 border-neutral-300 border-t-red-600 rounded-full animate-spin mb-2"></div>
-      <p class="text-sm text-neutral-600">Checking for new stories...</p>
+      <p class="text-sm text-neutral-600">Loading story...</p>
     </div>
 
     <div id="errorBanner" class="hidden mb-5 border-l-4 border-red-600 bg-red-50 text-red-900 p-3 text-sm"></div>
 
-    <div id="emptyState" class="hidden py-16 text-center border border-dashed border-neutral-300 rounded-sm">
-      <p id="emptyTitle" class="font-editorial text-2xl font-bold text-neutral-800 mb-1">No published posts yet.</p>
-      <p id="emptySubtext" class="text-sm text-neutral-500">New articles published from Admin will appear here.</p>
+    <!-- Home Feed View -->
+    <div id="homeView">
+      <div id="emptyState" class="hidden py-16 text-center border border-dashed border-neutral-300 rounded-sm">
+        <p id="emptyTitle" class="font-editorial text-2xl font-bold text-neutral-800 mb-1">No published posts yet.</p>
+        <p id="emptySubtext" class="text-sm text-neutral-500">New articles published from Admin will appear here.</p>
+      </div>
+
+      <section id="heroSection" class="hidden mb-8 pb-8 border-b border-neutral-300"></section>
+
+      <section id="gridSection" class="hidden">
+        <div class="flex items-center justify-between mb-4 border-b border-black pb-1.5">
+          <h2 id="sectionHeading" class="font-editorial text-xl font-bold uppercase tracking-wide">Latest Stories</h2>
+          <span id="postCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
+        </div>
+        <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+      </section>
+
+      <!-- Archive (Older than 6 months — Loaded Only on Request) -->
+      <section id="archiveSection" class="hidden mt-10 pt-6 border-t border-neutral-300">
+        <div id="archiveListWrap" class="hidden mb-6">
+          <div class="flex items-center justify-between mb-4 border-b border-neutral-300 pb-1.5">
+            <h2 class="font-editorial text-lg font-bold uppercase tracking-wide text-neutral-700">Older Posts (Archive)</h2>
+            <span id="archiveLoadedCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
+          </div>
+          <div id="archiveGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <div id="loadArchiveWrap" class="hidden text-center py-4">
+          <button id="loadArchiveBtn" type="button" class="border border-black hover:bg-black hover:text-white text-black text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-sm transition cursor-pointer">
+            Load Older Posts
+          </button>
+        </div>
+      </section>
     </div>
 
-    <section id="heroSection" class="hidden mb-8 pb-8 border-b border-neutral-300"></section>
-
-    <section id="gridSection" class="hidden">
-      <div class="flex items-center justify-between mb-4 border-b border-black pb-1.5">
-        <h2 id="sectionHeading" class="font-editorial text-xl font-bold uppercase tracking-wide">Latest Stories</h2>
-        <span id="postCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
-      </div>
-      <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
-    </section>
-
-    <!-- Archive (Older than 6 months — Loaded Only on Request) -->
-    <section id="archiveSection" class="hidden mt-10 pt-6 border-t border-neutral-300">
-      <div id="archiveListWrap" class="hidden mb-6">
-        <div class="flex items-center justify-between mb-4 border-b border-neutral-300 pb-1.5">
-          <h2 class="font-editorial text-lg font-bold uppercase tracking-wide text-neutral-700">Older Posts (Archive)</h2>
-          <span id="archiveLoadedCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
+    <!-- Full Article Page View -->
+    <div id="articlePageView" class="hidden">
+      <div class="max-w-3xl mx-auto">
+        <div class="flex items-center justify-between border-b border-neutral-200 pb-3 mb-5">
+          <button id="backToHomeBtn" type="button" class="text-xs font-semibold uppercase tracking-wider text-neutral-700 hover:text-red-600 cursor-pointer">
+            &larr; Back to News
+          </button>
+          <button id="articleCategoryBtn" type="button" class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-sm cursor-pointer"></button>
         </div>
-        <div id="archiveGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <article>
+          <h1 id="articleTitle" class="font-editorial text-3xl sm:text-4xl font-bold text-black leading-tight mb-3"></h1>
+          <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-6">
+            <span>By <strong id="articleAuthor" class="text-neutral-900"></strong></span>
+            <span>•</span>
+            <time id="articleDate"></time>
+          </div>
+
+          <div id="articleImageWrap" class="hidden mb-6">
+            <img id="articleImage" src="" alt="" class="w-full max-h-[460px] object-cover rounded-sm border border-neutral-200" />
+          </div>
+
+          <p id="articleExcerpt" class="text-base sm:text-lg font-semibold text-neutral-800 leading-relaxed mb-6 border-l-4 border-red-600 pl-4"></p>
+
+          <div id="articleBody" class="space-y-4 text-neutral-800 leading-relaxed text-base sm:text-[17px]"></div>
+        </article>
       </div>
 
-      <div id="loadArchiveWrap" class="hidden text-center py-4">
-        <button id="loadArchiveBtn" type="button" class="border border-black hover:bg-black hover:text-white text-black text-xs font-semibold uppercase tracking-wider px-5 py-2.5 rounded-sm transition cursor-pointer">
-          Load Older Posts
-        </button>
-      </div>
-    </section>
+      <!-- Related Content -->
+      <section id="relatedSection" class="hidden mt-12 pt-6 border-t-2 border-black">
+        <div class="flex items-center justify-between mb-5 border-b border-neutral-200 pb-2">
+          <h2 class="font-editorial text-xl font-bold uppercase tracking-wide text-black">Related Content</h2>
+          <span id="relatedSubtitle" class="text-xs font-semibold text-neutral-500 uppercase"></span>
+        </div>
+        <div id="relatedGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
+      </section>
+    </div>
   </main>
-
-  <!-- Article Modal -->
-  <div id="articleModal" class="hidden fixed inset-0 z-50 bg-black/70 overflow-y-auto p-4 sm:p-6">
-    <div class="max-w-3xl mx-auto bg-white rounded-sm shadow-2xl overflow-hidden my-4">
-      <div class="sticky top-0 bg-white border-b border-neutral-200 px-6 py-3 flex items-center justify-between z-10">
-        <span id="modalCategory" class="text-xs font-bold uppercase tracking-wider text-red-600"></span>
-        <button id="closeModalBtn" type="button" class="text-neutral-600 hover:text-black font-bold text-xl leading-none px-2 py-1 cursor-pointer">&times;</button>
-      </div>
-      <article class="p-6 sm:p-8">
-        <h1 id="modalTitle" class="font-editorial text-2xl sm:text-4xl font-bold text-black leading-tight mb-3"></h1>
-        <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-5">
-          <span>By <strong id="modalAuthor" class="text-neutral-900"></strong></span>
-          <span>•</span>
-          <time id="modalDate"></time>
-        </div>
-        <div id="modalImageWrap" class="hidden mb-6">
-          <img id="modalImage" src="" alt="" class="w-full max-h-[420px] object-cover rounded-sm border border-neutral-200" />
-        </div>
-        <p id="modalExcerpt" class="text-base sm:text-lg font-semibold text-neutral-800 leading-relaxed mb-5 border-l-4 border-red-600 pl-4"></p>
-        <div id="modalBody" class="space-y-4 text-neutral-800 leading-relaxed text-base"></div>
-      </article>
-    </div>
-  </div>
 
   <!-- Footer -->
   <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
@@ -176,7 +194,6 @@
         branch: localStorage.getItem('ds_gh_branch') || 'main'
       };
 
-      // Separate IndexedDB strictly for reader caching (never touches admin's NewspaperDB)
       const CACHE_DB_NAME = `NotunAloCache_${GH_CONFIG.owner}_${GH_CONFIG.repo}_${GH_CONFIG.branch}`;
       const CACHE_DB_VERSION = 1;
       const STORE_ARTICLES = 'articles';
@@ -186,12 +203,14 @@
 
       const liveDateEl = document.getElementById('liveDate');
       const footerYearEl = document.getElementById('footerYear');
+      const homeBrandLink = document.getElementById('homeBrandLink');
       const searchInput = document.getElementById('searchInput');
       const categoryBtns = document.querySelectorAll('.cat-btn');
       const breakingTicker = document.getElementById('breakingTicker');
 
       const loadingState = document.getElementById('loadingState');
       const errorBanner = document.getElementById('errorBanner');
+      const homeView = document.getElementById('homeView');
       const emptyState = document.getElementById('emptyState');
       const emptyTitle = document.getElementById('emptyTitle');
       const emptySubtext = document.getElementById('emptySubtext');
@@ -208,22 +227,26 @@
       const loadArchiveWrap = document.getElementById('loadArchiveWrap');
       const loadArchiveBtn = document.getElementById('loadArchiveBtn');
 
-      const articleModal = document.getElementById('articleModal');
-      const closeModalBtn = document.getElementById('closeModalBtn');
-      const modalCategory = document.getElementById('modalCategory');
-      const modalTitle = document.getElementById('modalTitle');
-      const modalAuthor = document.getElementById('modalAuthor');
-      const modalDate = document.getElementById('modalDate');
-      const modalImageWrap = document.getElementById('modalImageWrap');
-      const modalImage = document.getElementById('modalImage');
-      const modalExcerpt = document.getElementById('modalExcerpt');
-      const modalBody = document.getElementById('modalBody');
+      const articlePageView = document.getElementById('articlePageView');
+      const backToHomeBtn = document.getElementById('backToHomeBtn');
+      const articleCategoryBtn = document.getElementById('articleCategoryBtn');
+      const articleTitle = document.getElementById('articleTitle');
+      const articleAuthor = document.getElementById('articleAuthor');
+      const articleDate = document.getElementById('articleDate');
+      const articleImageWrap = document.getElementById('articleImageWrap');
+      const articleImage = document.getElementById('articleImage');
+      const articleExcerpt = document.getElementById('articleExcerpt');
+      const articleBody = document.getElementById('articleBody');
+      const relatedSection = document.getElementById('relatedSection');
+      const relatedSubtitle = document.getElementById('relatedSubtitle');
+      const relatedGrid = document.getElementById('relatedGrid');
 
-      let freshPosts = [];          // Posts <= 6 months old (cached in IndexedDB)
-      let archiveQueue = [];        // Unloaded posts > 6 months old (loaded only on request)
-      let archiveLoadedPosts = [];  // Posts > 6 months old loaded during this session
+      let freshPosts = [];
+      let archiveQueue = [];
+      let archiveLoadedPosts = [];
       let selectedCategory = 'All';
       let searchQuery = '';
+      let activeArticleSlug = '';
 
       function getSixMonthsCutoff() {
         const d = new Date();
@@ -273,6 +296,25 @@
         return m ? parseInt(m[1], 10) : 0;
       }
 
+      function postToSlug(post) {
+        return String(post.filename || '').replace(/\.md$/i, '');
+      }
+
+      function getRoutePostSlug() {
+        const hashMatch = (location.hash || '').match(/^#post=(.+)$/i);
+        if (hashMatch) return decodeURIComponent(hashMatch[1]);
+        const params = new URLSearchParams(location.search);
+        return params.get('post') || '';
+      }
+
+      function findPostBySlug(slug) {
+        if (!slug) return null;
+        const target = slug.toLowerCase();
+        return freshPosts.concat(archiveLoadedPosts).find(function (p) {
+          return postToSlug(p).toLowerCase() === target || p.filename.toLowerCase() === target;
+        }) || null;
+      }
+
       function sortPostsDesc(list) {
         return list.sort(function (a, b) {
           const ta = Date.parse(a.date) || 0;
@@ -282,12 +324,9 @@
         });
       }
 
-      // IndexedDB Helpers for Reader Cache
       function openCacheDB() {
         return new Promise(function (resolve, reject) {
-          if (!('indexedDB' in window)) {
-            return reject(new Error('IndexedDB unavailable'));
-          }
+          if (!('indexedDB' in window)) return reject(new Error('IndexedDB unavailable'));
           const req = indexedDB.open(CACHE_DB_NAME, CACHE_DB_VERSION);
           req.onupgradeneeded = function (e) {
             const db = e.target.result;
@@ -312,9 +351,7 @@
             req.onsuccess = function () { resolve(req.result || []); };
             req.onerror = function () { reject(req.error); };
           });
-        } catch (_) {
-          return [];
-        }
+        } catch (_) { return []; }
       }
 
       async function dbPutArticles(posts) {
@@ -354,9 +391,7 @@
             req.onsuccess = function () { resolve(req.result ? req.result.value : null); };
             req.onerror = function () { resolve(null); };
           });
-        } catch (_) {
-          return null;
-        }
+        } catch (_) { return null; }
       }
 
       async function dbSetMeta(key, value) {
@@ -371,7 +406,7 @@
         } catch (_) { /* ignore */ }
       }
 
-      function parseMarkdownPost(raw, filename) {
+      function parseMarkdownPost(raw, filename, version) {
         const normalized = String(raw || '').replace(/\r\n/g, '\n');
         const fmMatch = normalized.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
 
@@ -394,32 +429,26 @@
             if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
               val = val.slice(1, -1).replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\\\\/g, '\\');
             }
-            if (key in meta) {
-              meta[key] = val;
-            }
+            if (key in meta) meta[key] = val;
           });
           bodyRaw = fmMatch[2] || '';
         }
 
         const bodyLines = bodyRaw.split('\n');
         let firstIdx = 0;
-        while (firstIdx < bodyLines.length && bodyLines[firstIdx].trim() === '') {
-          firstIdx++;
-        }
-
-        const excerpt = firstIdx < bodyLines.length ? bodyLines[firstIdx].trim() : '';
-        const content = bodyLines.slice(firstIdx + 1).join('\n').trim();
+        while (firstIdx < bodyLines.length && bodyLines[firstIdx].trim() === '') firstIdx++;
 
         return {
           filename: filename,
           num: extractNumericSlug(filename),
+          v: version || 1,
           title: meta.title || 'Untitled',
           date: meta.date || '',
           category: meta.category || 'National',
           author: meta.author || 'Staff Correspondent',
           image: sanitizeImageUrl(meta.image),
-          excerpt: excerpt,
-          content: content
+          excerpt: firstIdx < bodyLines.length ? bodyLines[firstIdx].trim() : '',
+          content: bodyLines.slice(firstIdx + 1).join('\n').trim()
         };
       }
 
@@ -448,7 +477,7 @@
           btn.addEventListener('click', function () {
             const fname = btn.getAttribute('data-filename');
             const found = freshPosts.concat(archiveLoadedPosts).find(function (p) { return p.filename === fname; });
-            if (found) openArticleModal(found);
+            if (found) navigateToArticle(found);
           });
         });
       }
@@ -478,6 +507,16 @@
         `;
       }
 
+      function bindCardClicks(container) {
+        container.querySelectorAll('.article-card').forEach(function (card) {
+          card.addEventListener('click', function () {
+            const fname = card.getAttribute('data-filename');
+            const found = freshPosts.concat(archiveLoadedPosts).find(function (p) { return p.filename === fname; });
+            if (found) navigateToArticle(found);
+          });
+        });
+      }
+
       function filterPosts(list) {
         return list.filter(function (post) {
           const matchesCat = selectedCategory === 'All' || post.category.toLowerCase() === selectedCategory.toLowerCase();
@@ -486,7 +525,7 @@
         });
       }
 
-      function renderPosts() {
+      function renderHomeFeed() {
         const filteredFresh = filterPosts(freshPosts);
         const filteredArchive = filterPosts(archiveLoadedPosts);
 
@@ -549,7 +588,6 @@
           }
         }
 
-        // Render Archive Section (only if loaded on request or available to load)
         if (filteredArchive.length > 0 || archiveQueue.length > 0) {
           archiveSection.classList.remove('hidden');
 
@@ -571,64 +609,129 @@
           archiveSection.classList.add('hidden');
         }
 
-        document.querySelectorAll('.article-card').forEach(function (card) {
-          card.addEventListener('click', function () {
-            const fname = card.getAttribute('data-filename');
-            const found = freshPosts.concat(archiveLoadedPosts).find(function (p) { return p.filename === fname; });
-            if (found) openArticleModal(found);
-          });
-        });
+        bindCardClicks(homeView);
       }
 
-      function openArticleModal(post) {
-        modalCategory.textContent = post.category;
-        modalTitle.textContent = post.title;
-        modalAuthor.textContent = post.author;
-        modalDate.textContent = formatDate(post.date);
+      // Related Content selection: same category first, then newest posts
+      function getRelatedPosts(currentPost, limit) {
+        const pool = freshPosts.concat(archiveLoadedPosts).filter(function (p) {
+          return p.filename !== currentPost.filename;
+        });
+        const sameCat = sortPostsDesc(pool.filter(function (p) {
+          return p.category.toLowerCase() === currentPost.category.toLowerCase();
+        }));
+        const otherCat = sortPostsDesc(pool.filter(function (p) {
+          return p.category.toLowerCase() !== currentPost.category.toLowerCase();
+        }));
+        return {
+          items: sameCat.concat(otherCat).slice(0, limit || 3),
+          sameCategoryCount: sameCat.length
+        };
+      }
+
+      function renderArticlePage(post) {
+        activeArticleSlug = postToSlug(post);
+        document.title = `${post.title} — Notun Alo`;
+
+        homeView.classList.add('hidden');
+        articlePageView.classList.remove('hidden');
+
+        articleCategoryBtn.textContent = post.category;
+        articleCategoryBtn.setAttribute('data-cat', post.category);
+        articleTitle.textContent = post.title;
+        articleAuthor.textContent = post.author;
+        articleDate.textContent = formatDate(post.date);
 
         if (post.image) {
-          modalImage.src = post.image;
-          modalImage.alt = post.title;
-          modalImageWrap.classList.remove('hidden');
+          articleImage.src = post.image;
+          articleImage.alt = post.title;
+          articleImageWrap.classList.remove('hidden');
         } else {
-          modalImageWrap.classList.add('hidden');
-          modalImage.src = '';
+          articleImageWrap.classList.add('hidden');
+          articleImage.src = '';
         }
 
         if (post.excerpt) {
-          modalExcerpt.textContent = post.excerpt;
-          modalExcerpt.classList.remove('hidden');
+          articleExcerpt.textContent = post.excerpt;
+          articleExcerpt.classList.remove('hidden');
         } else {
-          modalExcerpt.classList.add('hidden');
+          articleExcerpt.classList.add('hidden');
         }
 
         const paragraphs = (post.content || '').split(/\n\s*\n/).filter(function (p) { return p.trim() !== ''; });
         if (paragraphs.length === 0 && !post.excerpt) {
-          modalBody.innerHTML = '<p class="text-neutral-500 italic">No additional content.</p>';
+          articleBody.innerHTML = '<p class="text-neutral-500 italic">No additional content.</p>';
         } else {
-          modalBody.innerHTML = paragraphs.map(function (para) {
+          articleBody.innerHTML = paragraphs.map(function (para) {
             return `<p class="whitespace-pre-line">${escapeHtml(para.trim())}</p>`;
           }).join('');
         }
 
-        articleModal.classList.remove('hidden');
-        document.body.classList.add('overflow-hidden');
+        // Render Related Content
+        const related = getRelatedPosts(post, 3);
+        if (related.items.length > 0) {
+          relatedSubtitle.textContent = related.sameCategoryCount > 0 ? `More in ${post.category}` : 'Latest Stories';
+          relatedGrid.innerHTML = related.items.map(function (p) { return renderCardHtml(p, false); }).join('');
+          bindCardClicks(relatedGrid);
+          relatedSection.classList.remove('hidden');
+        } else {
+          relatedSection.classList.add('hidden');
+          relatedGrid.innerHTML = '';
+        }
+
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      function closeArticleModal() {
-        articleModal.classList.add('hidden');
-        document.body.classList.remove('overflow-hidden');
+      function showHomeView() {
+        activeArticleSlug = '';
+        document.title = 'Notun Alo — Truth & Trust';
+        articlePageView.classList.add('hidden');
+        homeView.classList.remove('hidden');
+        renderHomeFeed();
       }
 
-      async function fetchMarkdownText(fileName) {
+      function navigateToArticle(post) {
+        const slug = postToSlug(post);
+        const targetHash = '#post=' + encodeURIComponent(slug);
+        if (location.hash !== targetHash) {
+          location.hash = targetHash;
+        } else {
+          renderArticlePage(post);
+        }
+      }
+
+      function navigateHome() {
+        if (location.hash) {
+          try {
+            history.pushState(null, '', location.pathname + location.search);
+          } catch (_) {
+            location.hash = '';
+          }
+        }
+        showHomeView();
+      }
+
+      function setActiveCategoryUI(cat) {
+        selectedCategory = cat;
+        categoryBtns.forEach(function (b) {
+          const isMatch = b.getAttribute('data-category').toLowerCase() === cat.toLowerCase();
+          b.classList.toggle('bg-red-600', isMatch);
+          b.classList.toggle('text-white', isMatch);
+          b.classList.toggle('text-neutral-800', !isMatch);
+          b.classList.toggle('hover:bg-neutral-100', !isMatch);
+        });
+      }
+
+      async function fetchMarkdownText(fileName, version) {
         const { owner, repo, branch } = GH_CONFIG;
-        const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}`;
+        const qs = version && version > 1 ? `?v=${version}` : '';
+        const rawUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}${qs}`;
         try {
-          const res = await fetch(rawUrl);
+          const res = await fetch(rawUrl, version > 1 ? { cache: 'no-store' } : undefined);
           if (res.ok) return await res.text();
-        } catch (_) { /* try cdn fallback */ }
+        } catch (_) { /* fallback */ }
 
-        const cdnUrl = `https://cdn.jsdelivr.net/gh/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}`;
+        const cdnUrl = `https://cdn.jsdelivr.net/gh/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}/posts/${encodeURIComponent(fileName)}${qs}`;
         const cdnRes = await fetch(cdnUrl);
         if (cdnRes.ok) return await cdnRes.text();
 
@@ -637,10 +740,10 @@
 
       function normalizeManifestEntry(entry) {
         if (typeof entry === 'number') {
-          return { filename: `${entry}.md`, num: entry, dateMs: null };
+          return { filename: `${entry}.md`, num: entry, dateMs: null, v: 1 };
         }
         if (typeof entry === 'string' && entry.toLowerCase().endsWith('.md')) {
-          return { filename: entry, num: extractNumericSlug(entry), dateMs: null };
+          return { filename: entry, num: extractNumericSlug(entry), dateMs: null, v: 1 };
         }
         if (entry && typeof entry === 'object') {
           const filename = entry.n != null
@@ -652,7 +755,8 @@
           return {
             filename: filename,
             num: entry.n != null ? Number(entry.n) : extractNumericSlug(filename),
-            dateMs: isNaN(parsed) ? null : parsed
+            dateMs: isNaN(parsed) ? null : parsed,
+            v: Number(entry.v) || 1
           };
         }
         return null;
@@ -661,7 +765,6 @@
       async function fetchManifestEntries() {
         const { owner, repo, branch } = GH_CONFIG;
 
-        // 1. Primary: tiny posts/index.json manifest (no API rate limit)
         const manifestUrl = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeURIComponent(branch)}/posts/index.json?t=${Date.now()}`;
         try {
           const res = await fetch(manifestUrl, { cache: 'no-store' });
@@ -673,7 +776,6 @@
           }
         } catch (_) { /* fall through */ }
 
-        // 2. Fallback: GitHub Contents API
         const apiUrl = `https://api.github.com/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/posts?ref=${encodeURIComponent(branch)}`;
         try {
           const apiRes = await fetch(apiUrl, { headers: { 'Accept': 'application/vnd.github+json' }, cache: 'no-store' });
@@ -689,7 +791,6 @@
           }
         } catch (_) { /* fall through */ }
 
-        // 3. Fallback: jsDelivr file list
         const jsdUrl = `https://data.jsdelivr.com/v1/packages/gh/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}@${encodeURIComponent(branch)}?structure=flat`;
         const jsdRes = await fetch(jsdUrl, { cache: 'no-store' });
         if (jsdRes.status === 404) return [];
@@ -702,11 +803,56 @@
           .filter(Boolean);
       }
 
+      async function resolveRouteArticleOnDemand(slug) {
+        const direct = findPostBySlug(slug);
+        if (direct) {
+          renderArticlePage(direct);
+          return;
+        }
+
+        // If user opened a direct link to an archived (>6 months) post, fetch just that post on demand
+        const candidateName = slug.toLowerCase().endsWith('.md') ? slug : `${slug}.md`;
+        const queuedIdx = archiveQueue.findIndex(function (e) {
+          return e.filename.toLowerCase() === candidateName.toLowerCase();
+        });
+
+        try {
+          loadingState.classList.remove('hidden');
+          const ver = queuedIdx !== -1 ? archiveQueue[queuedIdx].v : 1;
+          const raw = await fetchMarkdownText(candidateName, ver);
+          const post = parseMarkdownPost(raw, candidateName, ver);
+          if (queuedIdx !== -1) archiveQueue.splice(queuedIdx, 1);
+          archiveLoadedPosts = sortPostsDesc(archiveLoadedPosts.concat([post]));
+          renderArticlePage(post);
+        } catch (_) {
+          showHomeView();
+          showError(`Story "${slug}" was not found.`);
+        } finally {
+          loadingState.classList.add('hidden');
+        }
+      }
+
+      async function handleRouteChange() {
+        hideError();
+        const slug = getRoutePostSlug();
+        if (!slug) {
+          showHomeView();
+          return;
+        }
+        const found = findPostBySlug(slug);
+        if (found) {
+          renderArticlePage(found);
+        } else {
+          await resolveRouteArticleOnDemand(slug);
+        }
+      }
+
       async function initAndSyncPosts() {
         hideError();
         const cutoff = getSixMonthsCutoff();
+        const initialSlug = getRoutePostSlug();
 
-        // Step 1: Load from user's IndexedDB and remove posts older than 6 months
+        // 1. Read user's IndexedDB and delete posts older than 6 months
         const cached = await dbGetAllArticles();
         const expiredFilenames = [];
         const validCached = [];
@@ -726,15 +872,20 @@
 
         freshPosts = sortPostsDesc(validCached);
 
-        // Render immediately from IndexedDB if we already have cached stories
         if (freshPosts.length > 0) {
           updateTicker(freshPosts);
-          renderPosts();
+          if (initialSlug) {
+            const cachedTarget = findPostBySlug(initialSlug);
+            if (cachedTarget) renderArticlePage(cachedTarget);
+            else loadingState.classList.remove('hidden');
+          } else {
+            showHomeView();
+          }
         } else {
           loadingState.classList.remove('hidden');
         }
 
-        // Step 2: Check manifest and ONLY download new posts (<= 6 months old) not already in IndexedDB
+        // 2. Check manifest and download ONLY new or edited posts (<= 6 months old)
         try {
           const manifest = await fetchManifestEntries();
           const knownOldMap = (await dbGetMeta(OLD_INDEX_KEY)) || {};
@@ -745,7 +896,6 @@
 
           const manifestFilenames = new Set(manifest.map(function (m) { return m.filename; }));
 
-          // Remove from IndexedDB if a post was deleted from GitHub repo
           const removedFromRepo = [];
           freshPosts = freshPosts.filter(function (p) {
             if (!manifestFilenames.has(p.filename)) {
@@ -764,16 +914,15 @@
           manifest.forEach(function (entry) {
             const knownDateMs = entry.dateMs !== null ? entry.dateMs : (knownOldMap[entry.filename] || null);
             if (knownDateMs !== null && knownDateMs < cutoff) {
-              // Older than 6 months -> do NOT fetch automatically; queue for on-request loading
-              pendingArchive.push({ filename: entry.filename, num: entry.num, dateMs: knownDateMs });
+              pendingArchive.push({ filename: entry.filename, num: entry.num, dateMs: knownDateMs, v: entry.v });
               return;
             }
-            if (!cachedMap.has(entry.filename)) {
+            const existing = cachedMap.get(entry.filename);
+            if (!existing || entry.v > (existing.v || 1)) {
               toFetch.push(entry);
             }
           });
 
-          // Sort archive newest-first so clicking "Load Older Posts" shows most recent archive first
           pendingArchive.sort(function (a, b) {
             if (b.dateMs !== a.dateMs) return (b.dateMs || 0) - (a.dateMs || 0);
             return (b.num || 0) - (a.num || 0);
@@ -783,8 +932,8 @@
           if (toFetch.length > 0) {
             const results = await Promise.allSettled(
               toFetch.map(async function (entry) {
-                const raw = await fetchMarkdownText(entry.filename);
-                return parseMarkdownPost(raw, entry.filename);
+                const raw = await fetchMarkdownText(entry.filename, entry.v);
+                return parseMarkdownPost(raw, entry.filename, entry.v);
               })
             );
 
@@ -796,7 +945,7 @@
               if (!isNaN(ts) && ts < cutoff) {
                 knownOldMap[post.filename] = ts;
                 oldMapDirty = true;
-                archiveQueue.push({ filename: post.filename, num: post.num, dateMs: ts });
+                archiveQueue.push({ filename: post.filename, num: post.num, dateMs: ts, v: post.v });
               } else {
                 newlyFresh.push(post);
               }
@@ -808,24 +957,32 @@
 
             if (newlyFresh.length > 0) {
               await dbPutArticles(newlyFresh);
-              freshPosts = sortPostsDesc(freshPosts.concat(newlyFresh));
+              const updatedNames = new Set(newlyFresh.map(function (p) { return p.filename; }));
+              freshPosts = sortPostsDesc(
+                freshPosts.filter(function (p) { return !updatedNames.has(p.filename); }).concat(newlyFresh)
+              );
             }
           }
 
           updateTicker(freshPosts);
-          renderPosts();
+
+          const currentSlug = getRoutePostSlug();
+          if (currentSlug) {
+            await resolveRouteArticleOnDemand(currentSlug);
+          } else {
+            showHomeView();
+          }
         } catch (err) {
           if (freshPosts.length === 0) {
             updateTicker([]);
             showError('Could not load posts from GitHub: ' + err.message);
-            renderPosts();
+            showHomeView();
           }
         } finally {
           loadingState.classList.add('hidden');
         }
       }
 
-      // Load older (>6 months) posts strictly on user request; never cached in IndexedDB
       async function loadArchiveBatch() {
         if (archiveQueue.length === 0) return;
 
@@ -835,8 +992,8 @@
         const batch = archiveQueue.splice(0, ARCHIVE_BATCH_SIZE);
         const results = await Promise.allSettled(
           batch.map(async function (entry) {
-            const raw = await fetchMarkdownText(entry.filename);
-            return parseMarkdownPost(raw, entry.filename);
+            const raw = await fetchMarkdownText(entry.filename, entry.v);
+            return parseMarkdownPost(raw, entry.filename, entry.v);
           })
         );
 
@@ -848,38 +1005,51 @@
 
         archiveLoadedPosts = sortPostsDesc(archiveLoadedPosts);
         loadArchiveBtn.disabled = false;
-        renderPosts();
+        renderHomeFeed();
       }
 
       loadArchiveBtn.addEventListener('click', loadArchiveBatch);
 
+      backToHomeBtn.addEventListener('click', navigateHome);
+
+      homeBrandLink.addEventListener('click', function (e) {
+        if (getRoutePostSlug()) {
+          e.preventDefault();
+          setActiveCategoryUI('All');
+          searchQuery = '';
+          searchInput.value = '';
+          navigateHome();
+        }
+      });
+
+      articleCategoryBtn.addEventListener('click', function () {
+        const cat = articleCategoryBtn.getAttribute('data-cat') || 'All';
+        setActiveCategoryUI(cat);
+        navigateHome();
+      });
+
       categoryBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
-          selectedCategory = btn.getAttribute('data-category');
-          categoryBtns.forEach(function (b) {
-            b.classList.remove('bg-red-600', 'text-white');
-            b.classList.add('text-neutral-800', 'hover:bg-neutral-100');
-          });
-          btn.classList.add('bg-red-600', 'text-white');
-          btn.classList.remove('text-neutral-800', 'hover:bg-neutral-100');
-          renderPosts();
+          setActiveCategoryUI(btn.getAttribute('data-category'));
+          if (getRoutePostSlug() || activeArticleSlug) {
+            navigateHome();
+          } else {
+            renderHomeFeed();
+          }
         });
       });
 
       searchInput.addEventListener('input', function () {
         searchQuery = searchInput.value.trim();
-        renderPosts();
-      });
-
-      closeModalBtn.addEventListener('click', closeArticleModal);
-      articleModal.addEventListener('click', function (e) {
-        if (e.target === articleModal) closeArticleModal();
-      });
-      document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape' && !articleModal.classList.contains('hidden')) {
-          closeArticleModal();
+        if (getRoutePostSlug() || activeArticleSlug) {
+          navigateHome();
+        } else {
+          renderHomeFeed();
         }
       });
+
+      window.addEventListener('hashchange', handleRouteChange);
+      window.addEventListener('popstate', handleRouteChange);
 
       updateClock();
       initAndSyncPosts();
