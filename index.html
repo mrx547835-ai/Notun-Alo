@@ -4,6 +4,35 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Notun Alo — Truth &amp; Trust</title>
+  <meta id="metaDesc" name="description" content="Notun Alo — Trusted online news portal from Sylhet, Bangladesh covering National, Politics, Sports, Tech, and Entertainment." />
+  <meta name="robots" content="index, follow" />
+  <link id="canonicalLink" rel="canonical" href="./" />
+  <link rel="alternate" type="application/rss+xml" title="Notun Alo RSS Feed" href="rss.xml" />
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:site_name" content="Notun Alo" />
+  <meta id="ogType" property="og:type" content="website" />
+  <meta id="ogTitle" property="og:title" content="Notun Alo — Truth &amp; Trust" />
+  <meta id="ogDesc" property="og:description" content="Trusted online news portal from Sylhet, Bangladesh covering National, Politics, Sports, Tech, and Entertainment." />
+  <meta id="ogUrl" property="og:url" content="./" />
+  <meta id="ogImage" property="og:image" content="" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta id="twTitle" name="twitter:title" content="Notun Alo — Truth &amp; Trust" />
+  <meta id="twDesc" name="twitter:description" content="Trusted online news portal from Sylhet, Bangladesh." />
+  <meta id="twImage" name="twitter:image" content="" />
+
+  <!-- Structured Data (JSON-LD) -->
+  <script id="ldJson" type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Notun Alo",
+      "description": "Trusted online news portal from Sylhet, Bangladesh."
+    }
+  </script>
+
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -57,12 +86,12 @@
       </div>
 
       <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end w-full">
-        <input id="searchInput" type="search" placeholder="Search headlines..." class="w-full max-w-xs border border-neutral-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-black" />
+        <input id="searchInput" type="search" aria-label="Search headlines" placeholder="Search headlines..." class="w-full max-w-xs border border-neutral-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-black" />
       </div>
     </div>
 
     <!-- Categories -->
-    <nav class="border-t border-neutral-200 bg-white">
+    <nav aria-label="News Categories" class="border-t border-neutral-200 bg-white">
       <div class="max-w-6xl mx-auto px-4 flex items-center gap-1 overflow-x-auto py-2 text-sm font-semibold">
         <button data-category="All" class="cat-btn px-3 py-1 rounded-sm bg-red-600 text-white whitespace-nowrap cursor-pointer">All</button>
         <button data-category="National" class="cat-btn px-3 py-1 rounded-sm text-neutral-800 hover:bg-neutral-100 whitespace-nowrap cursor-pointer">National</button>
@@ -141,7 +170,12 @@
           <button id="backToHomeBtn" type="button" class="text-xs font-semibold uppercase tracking-wider text-neutral-700 hover:text-red-600 cursor-pointer">
             &larr; Back to News
           </button>
-          <button id="articleCategoryBtn" type="button" class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-sm cursor-pointer"></button>
+          <div class="flex items-center gap-2">
+            <button id="shareArticleBtn" type="button" class="text-[11px] font-semibold uppercase tracking-wider border border-neutral-300 hover:border-black px-2 py-0.5 rounded-sm cursor-pointer">
+              Copy Link
+            </button>
+            <button id="articleCategoryBtn" type="button" class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-sm cursor-pointer"></button>
+          </div>
         </div>
 
         <article>
@@ -188,7 +222,7 @@
   <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
     <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
       <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Notun Alo. All rights reserved.</p>
-      <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+      <nav aria-label="Footer Navigation" class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
         <a href="#page=about" class="hover:text-red-600 transition">About</a>
         <a href="#page=terms" class="hover:text-red-600 transition">Terms</a>
         <a href="#page=privacy" class="hover:text-red-600 transition">Privacy</a>
@@ -220,9 +254,12 @@
       const NEXT_PAGE_SIZE = 6;
       const ARCHIVE_BATCH_SIZE = 6;
 
+      const DEFAULT_DESC = 'Notun Alo — Trusted online news portal from Sylhet, Bangladesh covering National, Politics, Sports, Tech, and Entertainment.';
+
       const STATIC_PAGES = {
         about: {
           title: 'About Notun Alo',
+          desc: 'Learn about Notun Alo, an independent online news portal from Sylhet, Bangladesh.',
           html: `
             <p><strong>Notun Alo</strong> is an independent online news portal dedicated to delivering timely, accurate, and accessible news from Sylhet, across Bangladesh, and around the world.</p>
             <p>We cover National affairs, Politics, Sports, Technology, and Entertainment in both English and বাংলা, keeping readers informed with a fast, distraction-free reading experience.</p>
@@ -230,6 +267,7 @@
         },
         terms: {
           title: 'Terms & Conditions',
+          desc: 'Terms and conditions for using Notun Alo news portal.',
           html: `
             <p>By accessing and reading <strong>Notun Alo</strong>, you agree to comply with these Terms &amp; Conditions.</p>
             <h2 class="font-bold text-black text-lg pt-2">1. Content &amp; Copyright</h2>
@@ -242,6 +280,7 @@
         },
         privacy: {
           title: 'Privacy Policy',
+          desc: 'Privacy policy explaining local browser caching and minimal data usage on Notun Alo.',
           html: `
             <p><strong>Notun Alo</strong> respects your privacy and keeps data collection to an absolute minimum.</p>
             <h2 class="font-bold text-black text-lg pt-2">1. Local Browser Storage</h2>
@@ -252,6 +291,7 @@
         },
         disclaimer: {
           title: 'Disclaimer',
+          desc: 'Editorial disclaimer for Notun Alo.',
           html: `
             <p>The information published on <strong>Notun Alo</strong> is provided for general news and informational purposes only.</p>
             <p>While our editorial team strives to verify facts before publication, we make no warranties regarding the completeness, reliability, or absolute accuracy of all third-party reports or fast-breaking updates.</p>
@@ -260,6 +300,7 @@
         },
         faq: {
           title: 'Frequently Asked Questions (FAQ)',
+          desc: 'Frequently asked questions about reading news and archives on Notun Alo.',
           html: `
             <div class="space-y-4">
               <div class="border-b border-neutral-200 pb-3">
@@ -283,6 +324,7 @@
         },
         contact: {
           title: 'Contact Us',
+          desc: 'Contact Notun Alo editorial desk for news tips, corrections, and feedback.',
           html: `
             <p>We welcome news tips, reader feedback, corrections, and general inquiries.</p>
             <div class="bg-neutral-50 border border-neutral-200 rounded-sm p-5 space-y-2">
@@ -324,6 +366,7 @@
 
       const articlePageView = document.getElementById('articlePageView');
       const backToHomeBtn = document.getElementById('backToHomeBtn');
+      const shareArticleBtn = document.getElementById('shareArticleBtn');
       const articleCategoryBtn = document.getElementById('articleCategoryBtn');
       const articleTitle = document.getElementById('articleTitle');
       const articleAuthor = document.getElementById('articleAuthor');
@@ -347,6 +390,59 @@
       let selectedCategory = 'All';
       let searchQuery = '';
       let currentPage = 1;
+      let currentShareUrl = '';
+
+      function getBaseSiteUrl() {
+        if (location.protocol === 'file:') return '';
+        const cleanPath = location.pathname.replace(/\/index\.html$/i, '/').replace(/\/?$/, '/');
+        return location.origin + cleanPath;
+      }
+
+      function updateSeoMeta(opts) {
+        const title = opts.title || 'Notun Alo — Truth & Trust';
+        const desc = (opts.description || DEFAULT_DESC).slice(0, 160);
+        const type = opts.type || 'website';
+        const image = opts.image || '';
+        const canonical = opts.canonical || (getBaseSiteUrl() || location.href);
+
+        document.title = title;
+        document.getElementById('metaDesc').setAttribute('content', desc);
+        document.getElementById('canonicalLink').setAttribute('href', canonical);
+        document.getElementById('ogType').setAttribute('content', type);
+        document.getElementById('ogTitle').setAttribute('content', title);
+        document.getElementById('ogDesc').setAttribute('content', desc);
+        document.getElementById('ogUrl').setAttribute('content', canonical);
+        document.getElementById('ogImage').setAttribute('content', image);
+        document.getElementById('twTitle').setAttribute('content', title);
+        document.getElementById('twDesc').setAttribute('content', desc);
+        document.getElementById('twImage').setAttribute('content', image);
+
+        const ldEl = document.getElementById('ldJson');
+        if (opts.article) {
+          const a = opts.article;
+          const schema = {
+            '@context': 'https://schema.org',
+            '@type': 'NewsArticle',
+            headline: a.title,
+            description: desc,
+            datePublished: a.date || undefined,
+            articleSection: a.category,
+            author: { '@type': 'Person', name: a.author || 'Staff Correspondent' },
+            publisher: { '@type': 'Organization', name: 'Notun Alo' },
+            mainEntityOfPage: canonical
+          };
+          if (image) schema.image = [image];
+          ldEl.textContent = JSON.stringify(schema);
+        } else {
+          ldEl.textContent = JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            name: 'Notun Alo',
+            url: getBaseSiteUrl() || undefined,
+            description: desc
+          });
+        }
+      }
 
       function getSixMonthsCutoff() {
         const d = new Date();
@@ -801,17 +897,31 @@
       }
 
       function renderArticlePage(post) {
-        document.title = `${post.title} — Notun Alo`;
+        const slug = postToSlug(post);
+        const base = getBaseSiteUrl();
+        const seoUrl = base ? `${base}post/${encodeURIComponent(slug)}.html` : location.href;
+        currentShareUrl = seoUrl;
+
+        updateSeoMeta({
+          title: `${post.title} — Notun Alo`,
+          description: post.excerpt || post.content.slice(0, 155),
+          type: 'article',
+          image: post.image,
+          canonical: seoUrl,
+          article: post
+        });
 
         homeView.classList.add('hidden');
         staticPageView.classList.add('hidden');
         articlePageView.classList.remove('hidden');
 
+        shareArticleBtn.textContent = 'Copy Link';
         articleCategoryBtn.textContent = post.category;
         articleCategoryBtn.setAttribute('data-cat', post.category);
         articleTitle.textContent = post.title;
         articleAuthor.textContent = post.author;
         articleDate.textContent = formatDate(post.date);
+        articleDate.setAttribute('datetime', post.date || '');
 
         if (post.image) {
           articleImage.src = post.image;
@@ -858,7 +968,10 @@
           showHomeView();
           return;
         }
-        document.title = `${page.title} — Notun Alo`;
+        updateSeoMeta({
+          title: `${page.title} — Notun Alo`,
+          description: page.desc
+        });
         homeView.classList.add('hidden');
         articlePageView.classList.add('hidden');
         loadingState.classList.add('hidden');
@@ -869,7 +982,10 @@
       }
 
       function showHomeView() {
-        document.title = 'Notun Alo — Truth & Trust';
+        updateSeoMeta({
+          title: 'Notun Alo — Truth & Trust',
+          description: DEFAULT_DESC
+        });
         articlePageView.classList.add('hidden');
         staticPageView.classList.add('hidden');
         homeView.classList.remove('hidden');
@@ -878,21 +994,32 @@
 
       function navigateToArticle(post) {
         const slug = postToSlug(post);
-        const targetHash = '#post=' + encodeURIComponent(slug);
-        if (location.hash !== targetHash) {
-          location.hash = targetHash;
-        } else {
+        if (location.protocol !== 'file:') {
+          const url = new URL(location.href);
+          url.hash = '';
+          url.searchParams.set('post', slug);
+          if (location.search !== url.search || location.hash) {
+            history.pushState(null, '', url.pathname + url.search);
+          }
           renderArticlePage(post);
+        } else {
+          const targetHash = '#post=' + encodeURIComponent(slug);
+          if (location.hash !== targetHash) location.hash = targetHash;
+          else renderArticlePage(post);
         }
       }
 
       function navigateHome() {
-        if (location.hash) {
+        if (location.protocol !== 'file:') {
+          const url = new URL(location.href);
+          url.searchParams.delete('post');
+          url.searchParams.delete('page');
+          url.hash = '';
           try {
-            history.pushState(null, '', location.pathname + location.search);
-          } catch (_) {
-            location.hash = '';
-          }
+            history.pushState(null, '', url.pathname + (url.search ? url.search : ''));
+          } catch (_) { /* ignore */ }
+        } else if (location.hash) {
+          location.hash = '';
         }
         showHomeView();
       }
@@ -1203,6 +1330,17 @@
       loadArchiveBtn.addEventListener('click', loadArchiveBatch);
       backToHomeBtn.addEventListener('click', navigateHome);
       staticBackBtn.addEventListener('click', navigateHome);
+
+      shareArticleBtn.addEventListener('click', async function () {
+        const target = currentShareUrl || location.href;
+        try {
+          await navigator.clipboard.writeText(target);
+          shareArticleBtn.textContent = 'Copied!';
+          setTimeout(function () { shareArticleBtn.textContent = 'Copy Link'; }, 1800);
+        } catch (_) {
+          prompt('Copy article link:', target);
+        }
+      });
 
       homeBrandLink.addEventListener('click', function (e) {
         if (getRoute().type !== 'home') {
