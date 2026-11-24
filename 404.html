@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>404 — Page Not Found | Notun Alo</title>
   <meta name="robots" content="noindex, follow" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -49,8 +50,6 @@
   <script>
     (function () {
       document.getElementById('yr').textContent = String(new Date().getFullYear());
-
-      // Resolve true site root on GitHub Pages even for nested 404 URLs like /Notun-Alo/a/b/c
       var path = location.pathname || '/';
       var root = '/';
       if (location.hostname.endsWith('.github.io')) {
