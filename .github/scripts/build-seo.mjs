@@ -55,7 +55,9 @@ function parseMarkdownPost(raw, filename) {
     date: '',
     category: 'National',
     author: 'Staff Correspondent',
-    image: ''
+    image: '',
+    breaking: 'false',
+    featured: 'false'
   };
 
   let bodyRaw = normalized;
@@ -79,6 +81,7 @@ function parseMarkdownPost(raw, filename) {
 
   const excerpt = firstIdx < lines.length ? lines[firstIdx].trim() : '';
   const content = lines.slice(firstIdx + 1).join('\n').trim();
+  const words = `${excerpt} ${content}`.trim().split(/\s+/).filter(Boolean).length;
 
   return {
     slug,
@@ -89,6 +92,7 @@ function parseMarkdownPost(raw, filename) {
     category: meta.category || 'National',
     author: meta.author || 'Staff Correspondent',
     image: sanitizeImageUrl(meta.image),
+    readMins: Math.max(1, Math.ceil(words / 200)),
     excerpt,
     content
   };
@@ -157,6 +161,7 @@ function buildStaticPostHtml(post, relatedPosts, siteUrl) {
   <meta name="description" content="${escapeHtml(desc)}" />
   <meta name="robots" content="index, follow" />
   <link rel="canonical" href="${escapeHtml(canonical)}" />
+  <link rel="icon" type="image/svg+xml" href="../icon.svg" />
   <meta property="og:site_name" content="Notun Alo" />
   <meta property="og:type" content="article" />
   <meta property="og:title" content="${escapeHtml(post.title)}" />
@@ -196,10 +201,19 @@ function buildStaticPostHtml(post, relatedPosts, siteUrl) {
 
       <article>
         <h1 class="font-editorial text-3xl sm:text-4xl font-bold text-black leading-tight mb-3">${escapeHtml(post.title)}</h1>
-        <div class="flex flex-wrap items-center gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-6">
-          <span>By <strong class="text-neutral-900">${escapeHtml(post.author)}</strong></span>
-          <span>•</span>
-          <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDateDisplay(post.date))}</time>
+        <div class="flex flex-wrap items-center justify-between gap-3 text-xs sm:text-sm text-neutral-600 border-b border-neutral-200 pb-4 mb-6">
+          <div class="flex flex-wrap items-center gap-2.5">
+            <span>By <strong class="text-neutral-900">${escapeHtml(post.author)}</strong></span>
+            <span>•</span>
+            <time datetime="${escapeHtml(post.date)}">${escapeHtml(formatDateDisplay(post.date))}</time>
+            <span>•</span>
+            <span>${post.readMins} min read</span>
+          </div>
+          <div class="flex items-center gap-1.5 text-[11px] font-semibold">
+            <a href="https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(canonical)}" target="_blank" rel="noopener noreferrer" class="bg-[#1877F2] text-white px-2 py-1 rounded-sm">Facebook</a>
+            <a href="https://wa.me/?text=${encodeURIComponent(post.title + ' — ' + canonical)}" target="_blank" rel="noopener noreferrer" class="bg-[#25D366] text-white px-2 py-1 rounded-sm">WhatsApp</a>
+            <a href="https://twitter.com/intent/tweet?text=${encodeURIComponent(post.title)}&url=${encodeURIComponent(canonical)}" target="_blank" rel="noopener noreferrer" class="bg-black text-white px-2 py-1 rounded-sm">X</a>
+          </div>
         </div>
 
         ${post.image ? `<div class="mb-6"><img src="${escapeHtml(post.image)}" alt="${escapeHtml(post.title)}" class="w-full max-h-[460px] object-cover rounded-sm border border-neutral-200" /></div>` : ''}
@@ -232,16 +246,46 @@ function buildStaticPostHtml(post, relatedPosts, siteUrl) {
 `;
 }
 
-function main() {
+async function notifyTelegram(posts, siteUrl) {
+  const botToken = process.env.TELEGRAM_BOT_TOKEN;
+  const chatId = process.env.TELEGRAM_CHAT_ID;
+  const addedRaw = process.env.NEW_POST_FILES || '';
+  if (!botToken || !chatId || !addedRaw) return;
+
+  const addedSet = new Set(
+    addedRaw
+      .split(',')
+      .map((s) => path.basename(s.trim()))
+      .filter(Boolean)
+  );
+
+  for (const post of posts) {
+    if (!addedSet.has(post.filename)) continue;
+    const url = `${siteUrl}/post/${encodeURIComponent(post.slug)}.html`;
+    const text = `📰 *${post.category}*\n\n*${post.title}*\n\n${post.excerpt ? post.excerpt + '\n\n' : ''}🔗 ${url}`;
+    try {
+      await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text,
+          parse_mode: 'Markdown'
+        })
+      });
+    } catch (err) {
+      console.error('Telegram notify failed:', err.message);
+    }
+  }
+}
+
+async function main() {
   const siteUrl = getSiteUrl();
   let posts = [];
 
   if (fs.existsSync(POSTS_DIR)) {
     const files = fs.readdirSync(POSTS_DIR).filter((f) => f.toLowerCase().endsWith('.md'));
-    posts = files.map((file) => {
-      const raw = fs.readFileSync(path.join(POSTS_DIR, file), 'utf8');
-      return parseMarkdownPost(raw, file);
-    });
+    posts = files.map((file) => parseMarkdownPost(fs.readFileSync(path.join(POSTS_DIR, file), 'utf8'), file));
     posts.sort((a, b) => {
       const ta = Date.parse(a.date) || 0;
       const tb = Date.parse(b.date) || 0;
@@ -250,7 +294,6 @@ function main() {
     });
   }
 
-  // 1. Write static SEO HTML pages into post/
   fs.mkdirSync(OUT_POST_DIR, { recursive: true });
   const validHtmlFiles = new Set();
 
@@ -265,14 +308,12 @@ function main() {
     fs.writeFileSync(path.join(OUT_POST_DIR, outName), buildStaticPostHtml(post, related, siteUrl), 'utf8');
   }
 
-  // Remove stale post/*.html files if deleted from posts/
   for (const existing of fs.readdirSync(OUT_POST_DIR)) {
     if (existing.endsWith('.html') && !validHtmlFiles.has(existing)) {
       fs.unlinkSync(path.join(OUT_POST_DIR, existing));
     }
   }
 
-  // 2. Write robots.txt
   const robots = [
     'User-agent: *',
     'Allow: /',
@@ -283,7 +324,6 @@ function main() {
   ].join('\n');
   fs.writeFileSync(path.join(ROOT, 'robots.txt'), robots, 'utf8');
 
-  // 3. Write sitemap.xml
   const urlEntries = [
     `  <url>\n    <loc>${escapeXml(siteUrl)}/</loc>\n    <changefreq>daily</changefreq>\n    <priority>1.0</priority>\n  </url>`
   ];
@@ -297,7 +337,6 @@ function main() {
   const sitemap = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlEntries.join('\n')}\n</urlset>\n`;
   fs.writeFileSync(path.join(ROOT, 'sitemap.xml'), sitemap, 'utf8');
 
-  // 4. Write rss.xml (latest 20)
   const rssItems = posts.slice(0, 20).map((post) => {
     const link = `${siteUrl}/post/${encodeURIComponent(post.slug)}.html`;
     const pubDate = !isNaN(Date.parse(post.date)) ? new Date(post.date).toUTCString() : new Date().toUTCString();
@@ -328,6 +367,7 @@ function main() {
   ].join('\n');
   fs.writeFileSync(path.join(ROOT, 'rss.xml'), rss, 'utf8');
 
+  await notifyTelegram(posts, siteUrl);
   console.log(`Generated SEO assets for ${posts.length} posts at ${siteUrl}`);
 }
 
