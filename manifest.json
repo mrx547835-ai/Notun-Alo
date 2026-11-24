@@ -1,0 +1,18 @@
+{
+  "name": "Notun Alo — Truth & Trust",
+  "short_name": "Notun Alo",
+  "description": "Trusted online news portal from Sylhet, Bangladesh.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#dc2626",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
