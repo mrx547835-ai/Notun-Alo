@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin.html
+
+Sitemap: https://mrx547835-ai.github.io/Notun-Alo/sitemap.xml
