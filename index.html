@@ -56,11 +56,8 @@
         </a>
       </div>
 
-      <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end gap-2 w-full">
+      <div class="order-3 md:w-1/4 flex items-center justify-center md:justify-end w-full">
         <input id="searchInput" type="search" placeholder="Search headlines..." class="w-full max-w-xs border border-neutral-300 rounded-sm px-3 py-1.5 text-sm focus:outline-none focus:border-black" />
-        <a href="admin.html" class="shrink-0 text-xs font-semibold text-neutral-600 hover:text-red-600 border border-neutral-300 hover:border-red-600 px-2.5 py-1.5 rounded-sm transition">
-          Admin
-        </a>
       </div>
     </div>
 
@@ -114,6 +111,9 @@
           <span id="postCount" class="text-xs font-semibold text-neutral-500 uppercase"></span>
         </div>
         <div id="postsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+
+        <!-- Pagination Controls -->
+        <div id="paginationBar" class="hidden mt-8 flex flex-wrap items-center justify-center gap-1.5"></div>
       </section>
 
       <!-- Archive (Older than 6 months — Loaded Only on Request) -->
@@ -171,16 +171,32 @@
         <div id="relatedGrid" class="grid grid-cols-1 sm:grid-cols-3 gap-6"></div>
       </section>
     </div>
+
+    <!-- Static Info Pages View (About, Terms, Privacy, Disclaimer, FAQ, Contact) -->
+    <div id="staticPageView" class="hidden max-w-3xl mx-auto">
+      <div class="border-b border-neutral-200 pb-3 mb-6">
+        <button id="staticBackBtn" type="button" class="text-xs font-semibold uppercase tracking-wider text-neutral-700 hover:text-red-600 cursor-pointer">
+          &larr; Back to News
+        </button>
+      </div>
+      <h1 id="staticPageTitle" class="font-editorial text-3xl sm:text-4xl font-bold text-black mb-5 pb-3 border-b-2 border-black"></h1>
+      <div id="staticPageBody" class="space-y-4 text-neutral-800 text-sm sm:text-base leading-relaxed"></div>
+    </div>
   </main>
 
   <!-- Footer -->
   <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
-    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-2">
+    <div class="max-w-6xl mx-auto px-4 py-5 flex flex-col sm:flex-row items-center justify-between gap-3">
       <p class="font-semibold text-neutral-900">&copy; <span id="footerYear"></span> Notun Alo. All rights reserved.</p>
-      <div class="flex items-center gap-4">
-        <span>Posts cached locally for 6 months</span>
-        <a href="admin.html" class="text-neutral-700 hover:text-red-600 underline">Admin Desk</a>
-      </div>
+      <nav class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
+        <a href="#page=about" class="hover:text-red-600 transition">About</a>
+        <a href="#page=terms" class="hover:text-red-600 transition">Terms</a>
+        <a href="#page=privacy" class="hover:text-red-600 transition">Privacy</a>
+        <a href="#page=disclaimer" class="hover:text-red-600 transition">Disclaimer</a>
+        <a href="#page=faq" class="hover:text-red-600 transition">FAQ</a>
+        <a href="#page=contact" class="hover:text-red-600 transition">Contact</a>
+        <a href="admin.html" class="text-neutral-900 font-semibold hover:text-red-600 underline">Admin Panel</a>
+      </nav>
     </div>
   </footer>
 
@@ -199,7 +215,85 @@
       const STORE_ARTICLES = 'articles';
       const STORE_META = 'meta';
       const OLD_INDEX_KEY = 'known_old_posts';
+
+      const FIRST_PAGE_SIZE = 7;
+      const NEXT_PAGE_SIZE = 6;
       const ARCHIVE_BATCH_SIZE = 6;
+
+      const STATIC_PAGES = {
+        about: {
+          title: 'About Notun Alo',
+          html: `
+            <p><strong>Notun Alo</strong> is an independent online news portal dedicated to delivering timely, accurate, and accessible news from Sylhet, across Bangladesh, and around the world.</p>
+            <p>We cover National affairs, Politics, Sports, Technology, and Entertainment in both English and বাংলা, keeping readers informed with a fast, distraction-free reading experience.</p>
+          `
+        },
+        terms: {
+          title: 'Terms & Conditions',
+          html: `
+            <p>By accessing and reading <strong>Notun Alo</strong>, you agree to comply with these Terms &amp; Conditions.</p>
+            <h2 class="font-bold text-black text-lg pt-2">1. Content &amp; Copyright</h2>
+            <p>All articles, headlines, graphics, and editorial materials published on Notun Alo are protected by copyright. You may share links to our stories for personal, non-commercial use with proper attribution. Republishing full articles without prior permission is prohibited.</p>
+            <h2 class="font-bold text-black text-lg pt-2">2. Acceptable Use</h2>
+            <p>You agree not to misuse the site, attempt unauthorized access to editorial tools, or disrupt site availability.</p>
+            <h2 class="font-bold text-black text-lg pt-2">3. Changes to Terms</h2>
+            <p>Notun Alo reserves the right to update these terms at any time without prior notice.</p>
+          `
+        },
+        privacy: {
+          title: 'Privacy Policy',
+          html: `
+            <p><strong>Notun Alo</strong> respects your privacy and keeps data collection to an absolute minimum.</p>
+            <h2 class="font-bold text-black text-lg pt-2">1. Local Browser Storage</h2>
+            <p>To reduce data usage and load news quickly, recent articles (up to 6 months) are stored locally in your browser's IndexedDB cache. Articles older than 6 months are automatically removed from your browser storage. This data stays strictly on your device and is never sent to us.</p>
+            <h2 class="font-bold text-black text-lg pt-2">2. Third-Party Services</h2>
+            <p>News files and fonts are served through public content delivery networks (such as GitHub and Google Fonts), which may log standard technical request metadata according to their own privacy policies.</p>
+          `
+        },
+        disclaimer: {
+          title: 'Disclaimer',
+          html: `
+            <p>The information published on <strong>Notun Alo</strong> is provided for general news and informational purposes only.</p>
+            <p>While our editorial team strives to verify facts before publication, we make no warranties regarding the completeness, reliability, or absolute accuracy of all third-party reports or fast-breaking updates.</p>
+            <p>Views expressed by individual authors or quoted sources do not necessarily reflect the official position of Notun Alo. External links, if any, are provided for reference and Notun Alo is not responsible for the content of external websites.</p>
+          `
+        },
+        faq: {
+          title: 'Frequently Asked Questions (FAQ)',
+          html: `
+            <div class="space-y-4">
+              <div class="border-b border-neutral-200 pb-3">
+                <h2 class="font-bold text-black">How often is news updated on Notun Alo?</h2>
+                <p class="mt-1">Stories are published continuously by our editorial desk and appear automatically on the front page.</p>
+              </div>
+              <div class="border-b border-neutral-200 pb-3">
+                <h2 class="font-bold text-black">Why does the site load so fast on repeat visits?</h2>
+                <p class="mt-1">Previously loaded articles from the last 6 months are saved locally in your browser, so repeat visits only fetch newly published stories.</p>
+              </div>
+              <div class="border-b border-neutral-200 pb-3">
+                <h2 class="font-bold text-black">Where can I find news older than 6 months?</h2>
+                <p class="mt-1">Scroll to the bottom of the home page and click <em>Load Older Posts</em> to view archived articles on request.</p>
+              </div>
+              <div>
+                <h2 class="font-bold text-black">How can I report a correction or send a news tip?</h2>
+                <p class="mt-1">Please reach out to our editorial desk through the <a href="#page=contact" class="text-red-600 underline">Contact</a> page.</p>
+              </div>
+            </div>
+          `
+        },
+        contact: {
+          title: 'Contact Us',
+          html: `
+            <p>We welcome news tips, reader feedback, corrections, and general inquiries.</p>
+            <div class="bg-neutral-50 border border-neutral-200 rounded-sm p-5 space-y-2">
+              <p><strong>Editorial Desk:</strong> Notun Alo, Sylhet, Bangladesh</p>
+              <p><strong>Email:</strong> <a href="mailto:editorial@notunalo.com" class="text-red-600 underline">editorial@notunalo.com</a></p>
+              <p><strong>Newsroom Hours:</strong> Saturday – Thursday, 9:00 AM – 8:00 PM (BST)</p>
+            </div>
+            <p class="text-xs text-neutral-500">For urgent corrections, please include the article headline or link in your email.</p>
+          `
+        }
+      };
 
       const liveDateEl = document.getElementById('liveDate');
       const footerYearEl = document.getElementById('footerYear');
@@ -219,6 +313,7 @@
       const sectionHeading = document.getElementById('sectionHeading');
       const postCount = document.getElementById('postCount');
       const postsGrid = document.getElementById('postsGrid');
+      const paginationBar = document.getElementById('paginationBar');
 
       const archiveSection = document.getElementById('archiveSection');
       const archiveListWrap = document.getElementById('archiveListWrap');
@@ -241,12 +336,17 @@
       const relatedSubtitle = document.getElementById('relatedSubtitle');
       const relatedGrid = document.getElementById('relatedGrid');
 
+      const staticPageView = document.getElementById('staticPageView');
+      const staticBackBtn = document.getElementById('staticBackBtn');
+      const staticPageTitle = document.getElementById('staticPageTitle');
+      const staticPageBody = document.getElementById('staticPageBody');
+
       let freshPosts = [];
       let archiveQueue = [];
       let archiveLoadedPosts = [];
       let selectedCategory = 'All';
       let searchQuery = '';
-      let activeArticleSlug = '';
+      let currentPage = 1;
 
       function getSixMonthsCutoff() {
         const d = new Date();
@@ -300,11 +400,19 @@
         return String(post.filename || '').replace(/\.md$/i, '');
       }
 
-      function getRoutePostSlug() {
-        const hashMatch = (location.hash || '').match(/^#post=(.+)$/i);
-        if (hashMatch) return decodeURIComponent(hashMatch[1]);
+      function getRoute() {
+        const hash = location.hash || '';
+        const postHash = hash.match(/^#post=(.+)$/i);
+        if (postHash) return { type: 'post', value: decodeURIComponent(postHash[1]) };
+
+        const pageHash = hash.match(/^#page=(.+)$/i);
+        if (pageHash) return { type: 'page', value: decodeURIComponent(pageHash[1]).toLowerCase() };
+
         const params = new URLSearchParams(location.search);
-        return params.get('post') || '';
+        if (params.get('post')) return { type: 'post', value: params.get('post') };
+        if (params.get('page')) return { type: 'page', value: params.get('page').toLowerCase() };
+
+        return { type: 'home', value: '' };
       }
 
       function findPostBySlug(slug) {
@@ -385,7 +493,7 @@
       async function dbGetMeta(key) {
         try {
           const db = await openCacheDB();
-          return await new Promise(function (resolve) {
+          return await new Promise(function (resolve, reject) {
             const tx = db.transaction(STORE_META, 'readonly');
             const req = tx.objectStore(STORE_META).get(key);
             req.onsuccess = function () { resolve(req.result ? req.result.value : null); };
@@ -397,7 +505,7 @@
       async function dbSetMeta(key, value) {
         try {
           const db = await openCacheDB();
-          await new Promise(function (resolve) {
+          await new Promise(function (resolve, reject) {
             const tx = db.transaction(STORE_META, 'readwrite');
             tx.objectStore(STORE_META).put({ key: key, value: value });
             tx.oncomplete = resolve;
@@ -525,6 +633,49 @@
         });
       }
 
+      function renderPagination(totalPages) {
+        if (totalPages <= 1) {
+          paginationBar.classList.add('hidden');
+          paginationBar.innerHTML = '';
+          return;
+        }
+
+        const btnBase = 'px-3 py-1.5 text-xs font-semibold rounded-sm border transition cursor-pointer';
+        let html = '';
+
+        html += `<button type="button" data-page="${currentPage - 1}" ${currentPage === 1 ? 'disabled' : ''} class="${btnBase} ${currentPage === 1 ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-800 hover:border-black'}">&larr; Prev</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+          if (totalPages > 7 && p !== 1 && p !== totalPages && Math.abs(p - currentPage) > 1) {
+            if (p === 2 || p === totalPages - 1) {
+              html += `<span class="px-1.5 text-xs text-neutral-400">…</span>`;
+            }
+            continue;
+          }
+          const activeClass = p === currentPage
+            ? 'bg-red-600 border-red-600 text-white'
+            : 'border-neutral-300 text-neutral-800 hover:border-black';
+          html += `<button type="button" data-page="${p}" class="${btnBase} ${activeClass}">${p}</button>`;
+        }
+
+        html += `<button type="button" data-page="${currentPage + 1}" ${currentPage === totalPages ? 'disabled' : ''} class="${btnBase} ${currentPage === totalPages ? 'border-neutral-200 text-neutral-300 cursor-not-allowed' : 'border-neutral-300 text-neutral-800 hover:border-black'}">Next &rarr;</button>`;
+
+        paginationBar.innerHTML = html;
+        paginationBar.classList.remove('hidden');
+
+        paginationBar.querySelectorAll('button[data-page]').forEach(function (btn) {
+          btn.addEventListener('click', function () {
+            if (btn.disabled) return;
+            const target = Number(btn.getAttribute('data-page'));
+            if (target >= 1 && target <= totalPages && target !== currentPage) {
+              currentPage = target;
+              renderHomeFeed();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
+        });
+      }
+
       function renderHomeFeed() {
         const filteredFresh = filterPosts(freshPosts);
         const filteredArchive = filterPosts(archiveLoadedPosts);
@@ -532,6 +683,7 @@
         heroSection.classList.add('hidden');
         gridSection.classList.add('hidden');
         emptyState.classList.add('hidden');
+        paginationBar.classList.add('hidden');
 
         if (freshPosts.length === 0 && archiveLoadedPosts.length === 0) {
           emptyState.classList.remove('hidden');
@@ -549,42 +701,62 @@
         }
 
         if (filteredFresh.length > 0) {
-          const heroPost = filteredFresh[0];
-          const remainingPosts = filteredFresh.slice(1);
+          const totalFresh = filteredFresh.length;
+          const totalPages = totalFresh <= FIRST_PAGE_SIZE
+            ? 1
+            : 1 + Math.ceil((totalFresh - FIRST_PAGE_SIZE) / NEXT_PAGE_SIZE);
 
-          const heroImgHtml = heroPost.image
-            ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
-            : `<div class="w-full h-64 sm:h-80 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Notun Alo</div>`;
+          if (currentPage > totalPages) currentPage = totalPages;
+          if (currentPage < 1) currentPage = 1;
 
-          heroSection.innerHTML = `
-            <article data-filename="${escapeHtml(heroPost.filename)}" class="article-card group grid grid-cols-1 lg:grid-cols-12 gap-6 items-center cursor-pointer">
-              <div class="lg:col-span-7 overflow-hidden">${heroImgHtml}</div>
-              <div class="lg:col-span-5 flex flex-col justify-center">
-                <div class="flex items-center gap-2 mb-2">
-                  <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5">${escapeHtml(heroPost.category)}</span>
-                  <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Featured</span>
+          let heroPost = null;
+          let gridPosts = [];
+
+          if (currentPage === 1) {
+            heroPost = filteredFresh[0];
+            gridPosts = filteredFresh.slice(1, FIRST_PAGE_SIZE);
+          } else {
+            const start = FIRST_PAGE_SIZE + (currentPage - 2) * NEXT_PAGE_SIZE;
+            gridPosts = filteredFresh.slice(start, start + NEXT_PAGE_SIZE);
+          }
+
+          if (heroPost) {
+            const heroImgHtml = heroPost.image
+              ? `<img src="${escapeHtml(heroPost.image)}" alt="${escapeHtml(heroPost.title)}" class="w-full h-64 sm:h-80 object-cover rounded-sm border border-neutral-200" onerror="this.style.display='none'" />`
+              : `<div class="w-full h-64 sm:h-80 bg-neutral-100 border border-neutral-200 rounded-sm flex items-center justify-center text-neutral-400 font-editorial text-2xl">Notun Alo</div>`;
+
+            heroSection.innerHTML = `
+              <article data-filename="${escapeHtml(heroPost.filename)}" class="article-card group grid grid-cols-1 lg:grid-cols-12 gap-6 items-center cursor-pointer">
+                <div class="lg:col-span-7 overflow-hidden">${heroImgHtml}</div>
+                <div class="lg:col-span-5 flex flex-col justify-center">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="bg-red-600 text-white text-[11px] font-bold uppercase tracking-wider px-2 py-0.5">${escapeHtml(heroPost.category)}</span>
+                    <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Featured</span>
+                  </div>
+                  <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-black group-hover:text-red-600 transition leading-tight mb-3">
+                    ${escapeHtml(heroPost.title)}
+                  </h2>
+                  <p class="text-neutral-700 text-sm sm:text-base leading-relaxed mb-4 line-clamp-3">
+                    ${escapeHtml(heroPost.excerpt || heroPost.content.slice(0, 180))}
+                  </p>
+                  <div class="text-xs text-neutral-500 flex items-center gap-2">
+                    <span class="text-neutral-800 font-semibold">${escapeHtml(heroPost.author)}</span>
+                    <span>•</span>
+                    <span>${escapeHtml(formatDate(heroPost.date))}</span>
+                  </div>
                 </div>
-                <h2 class="font-editorial text-2xl sm:text-3xl font-bold text-black group-hover:text-red-600 transition leading-tight mb-3">
-                  ${escapeHtml(heroPost.title)}
-                </h2>
-                <p class="text-neutral-700 text-sm sm:text-base leading-relaxed mb-4 line-clamp-3">
-                  ${escapeHtml(heroPost.excerpt || heroPost.content.slice(0, 180))}
-                </p>
-                <div class="text-xs text-neutral-500 flex items-center gap-2">
-                  <span class="text-neutral-800 font-semibold">${escapeHtml(heroPost.author)}</span>
-                  <span>•</span>
-                  <span>${escapeHtml(formatDate(heroPost.date))}</span>
-                </div>
-              </div>
-            </article>
-          `;
-          heroSection.classList.remove('hidden');
+              </article>
+            `;
+            heroSection.classList.remove('hidden');
+          }
 
-          if (remainingPosts.length > 0) {
-            sectionHeading.textContent = selectedCategory === 'All' ? 'More News' : selectedCategory + ' News';
-            postCount.textContent = remainingPosts.length + (remainingPosts.length === 1 ? ' Article' : ' Articles');
-            postsGrid.innerHTML = remainingPosts.map(function (p) { return renderCardHtml(p, false); }).join('');
+          if (gridPosts.length > 0) {
+            const baseLabel = selectedCategory === 'All' ? 'More News' : selectedCategory + ' News';
+            sectionHeading.textContent = totalPages > 1 ? `${baseLabel} (Page ${currentPage}/${totalPages})` : baseLabel;
+            postCount.textContent = totalFresh + (totalFresh === 1 ? ' Article' : ' Articles');
+            postsGrid.innerHTML = gridPosts.map(function (p) { return renderCardHtml(p, false); }).join('');
             gridSection.classList.remove('hidden');
+            renderPagination(totalPages);
           }
         }
 
@@ -612,7 +784,6 @@
         bindCardClicks(homeView);
       }
 
-      // Related Content selection: same category first, then newest posts
       function getRelatedPosts(currentPost, limit) {
         const pool = freshPosts.concat(archiveLoadedPosts).filter(function (p) {
           return p.filename !== currentPost.filename;
@@ -630,10 +801,10 @@
       }
 
       function renderArticlePage(post) {
-        activeArticleSlug = postToSlug(post);
         document.title = `${post.title} — Notun Alo`;
 
         homeView.classList.add('hidden');
+        staticPageView.classList.add('hidden');
         articlePageView.classList.remove('hidden');
 
         articleCategoryBtn.textContent = post.category;
@@ -667,7 +838,6 @@
           }).join('');
         }
 
-        // Render Related Content
         const related = getRelatedPosts(post, 3);
         if (related.items.length > 0) {
           relatedSubtitle.textContent = related.sameCategoryCount > 0 ? `More in ${post.category}` : 'Latest Stories';
@@ -682,10 +852,26 @@
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
+      function renderStaticPage(pageKey) {
+        const page = STATIC_PAGES[pageKey];
+        if (!page) {
+          showHomeView();
+          return;
+        }
+        document.title = `${page.title} — Notun Alo`;
+        homeView.classList.add('hidden');
+        articlePageView.classList.add('hidden');
+        loadingState.classList.add('hidden');
+        staticPageTitle.textContent = page.title;
+        staticPageBody.innerHTML = page.html;
+        staticPageView.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
       function showHomeView() {
-        activeArticleSlug = '';
         document.title = 'Notun Alo — Truth & Trust';
         articlePageView.classList.add('hidden');
+        staticPageView.classList.add('hidden');
         homeView.classList.remove('hidden');
         renderHomeFeed();
       }
@@ -713,6 +899,7 @@
 
       function setActiveCategoryUI(cat) {
         selectedCategory = cat;
+        currentPage = 1;
         categoryBtns.forEach(function (b) {
           const isMatch = b.getAttribute('data-category').toLowerCase() === cat.toLowerCase();
           b.classList.toggle('bg-red-600', isMatch);
@@ -810,7 +997,6 @@
           return;
         }
 
-        // If user opened a direct link to an archived (>6 months) post, fetch just that post on demand
         const candidateName = slug.toLowerCase().endsWith('.md') ? slug : `${slug}.md`;
         const queuedIdx = archiveQueue.findIndex(function (e) {
           return e.filename.toLowerCase() === candidateName.toLowerCase();
@@ -834,25 +1020,29 @@
 
       async function handleRouteChange() {
         hideError();
-        const slug = getRoutePostSlug();
-        if (!slug) {
-          showHomeView();
+        const route = getRoute();
+        if (route.type === 'page') {
+          renderStaticPage(route.value);
           return;
         }
-        const found = findPostBySlug(slug);
-        if (found) {
-          renderArticlePage(found);
-        } else {
-          await resolveRouteArticleOnDemand(slug);
+        if (route.type === 'post') {
+          const found = findPostBySlug(route.value);
+          if (found) renderArticlePage(found);
+          else await resolveRouteArticleOnDemand(route.value);
+          return;
         }
+        showHomeView();
       }
 
       async function initAndSyncPosts() {
         hideError();
         const cutoff = getSixMonthsCutoff();
-        const initialSlug = getRoutePostSlug();
+        const initialRoute = getRoute();
 
-        // 1. Read user's IndexedDB and delete posts older than 6 months
+        if (initialRoute.type === 'page') {
+          renderStaticPage(initialRoute.value);
+        }
+
         const cached = await dbGetAllArticles();
         const expiredFilenames = [];
         const validCached = [];
@@ -874,18 +1064,17 @@
 
         if (freshPosts.length > 0) {
           updateTicker(freshPosts);
-          if (initialSlug) {
-            const cachedTarget = findPostBySlug(initialSlug);
+          if (initialRoute.type === 'post') {
+            const cachedTarget = findPostBySlug(initialRoute.value);
             if (cachedTarget) renderArticlePage(cachedTarget);
             else loadingState.classList.remove('hidden');
-          } else {
+          } else if (initialRoute.type === 'home') {
             showHomeView();
           }
-        } else {
+        } else if (initialRoute.type !== 'page') {
           loadingState.classList.remove('hidden');
         }
 
-        // 2. Check manifest and download ONLY new or edited posts (<= 6 months old)
         try {
           const manifest = await fetchManifestEntries();
           const knownOldMap = (await dbGetMeta(OLD_INDEX_KEY)) || {};
@@ -966,14 +1155,17 @@
 
           updateTicker(freshPosts);
 
-          const currentSlug = getRoutePostSlug();
-          if (currentSlug) {
-            await resolveRouteArticleOnDemand(currentSlug);
+          const currentRoute = getRoute();
+          if (currentRoute.type === 'post') {
+            await resolveRouteArticleOnDemand(currentRoute.value);
+          } else if (currentRoute.type === 'page') {
+            renderStaticPage(currentRoute.value);
           } else {
             showHomeView();
           }
         } catch (err) {
-          if (freshPosts.length === 0) {
+          const currentRoute = getRoute();
+          if (freshPosts.length === 0 && currentRoute.type !== 'page') {
             updateTicker([]);
             showError('Could not load posts from GitHub: ' + err.message);
             showHomeView();
@@ -1009,11 +1201,11 @@
       }
 
       loadArchiveBtn.addEventListener('click', loadArchiveBatch);
-
       backToHomeBtn.addEventListener('click', navigateHome);
+      staticBackBtn.addEventListener('click', navigateHome);
 
       homeBrandLink.addEventListener('click', function (e) {
-        if (getRoutePostSlug()) {
+        if (getRoute().type !== 'home') {
           e.preventDefault();
           setActiveCategoryUI('All');
           searchQuery = '';
@@ -1031,7 +1223,7 @@
       categoryBtns.forEach(function (btn) {
         btn.addEventListener('click', function () {
           setActiveCategoryUI(btn.getAttribute('data-category'));
-          if (getRoutePostSlug() || activeArticleSlug) {
+          if (getRoute().type !== 'home') {
             navigateHome();
           } else {
             renderHomeFeed();
@@ -1041,7 +1233,8 @@
 
       searchInput.addEventListener('input', function () {
         searchQuery = searchInput.value.trim();
-        if (getRoutePostSlug() || activeArticleSlug) {
+        currentPage = 1;
+        if (getRoute().type !== 'home') {
           navigateHome();
         } else {
           renderHomeFeed();
