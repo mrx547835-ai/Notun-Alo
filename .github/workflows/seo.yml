@@ -1,4 +1,4 @@
-name: Build SEO Pages, Sitemap & RSS
+name: Build SEO Pages, Sitemap, RSS & Telegram
 
 on:
   push:
@@ -21,13 +21,29 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: Generate sitemap.xml, robots.txt, rss.xml, and static post pages
+      - name: Detect newly added posts
+        id: changed
+        run: |
+          if git rev-parse HEAD~1 >/dev/null 2>&1; then
+            ADDED=$(git diff --name-only --diff-filter=A HEAD~1 HEAD -- 'posts/*.md' | tr '\n' ',')
+          else
+            ADDED=""
+          fi
+          echo "added=$ADDED" >> "$GITHUB_OUTPUT"
+
+      - name: Generate sitemap, robots, rss, static post pages & notify Telegram
+        env:
+          NEW_POST_FILES: ${{ steps.changed.outputs.added }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
         run: node .github/scripts/build-seo.mjs
 
       - name: Commit generated SEO files
