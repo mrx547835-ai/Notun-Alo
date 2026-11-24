@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Page Not Found | Notun Alo</title>
+  <meta name="robots" content="noindex, follow" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet" />
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .font-editorial { font-family: 'Playfair Display', Georgia, serif; }
+  </style>
+</head>
+<body class="bg-white text-neutral-900 min-h-screen flex flex-col">
+
+  <header class="border-b-2 border-black bg-white">
+    <div class="max-w-5xl mx-auto px-4 py-5 text-center">
+      <a id="brandHome" href="./" class="inline-block">
+        <h1 class="font-editorial text-4xl font-extrabold tracking-tight text-black">
+          Notun <span class="text-red-600">Alo</span>
+        </h1>
+        <div class="h-1 w-20 bg-red-600 mx-auto mt-1"></div>
+      </a>
+    </div>
+  </header>
+
+  <main class="flex-1 flex items-center justify-center px-4 py-16">
+    <div class="max-w-lg w-full text-center border border-neutral-200 rounded-sm p-8 sm:p-10">
+      <span class="inline-block bg-red-600 text-white text-xs font-bold uppercase tracking-widest px-3 py-1 mb-4">Error 404</span>
+      <h2 class="font-editorial text-3xl sm:text-4xl font-bold text-black mb-3">Page Not Found</h2>
+      <p class="text-sm sm:text-base text-neutral-600 mb-6 leading-relaxed">
+        The article or page you are looking for may have been removed, renamed, or does not exist.
+      </p>
+      <a id="backHomeBtn" href="./" class="inline-block bg-black hover:bg-red-600 text-white text-xs font-semibold uppercase tracking-wider px-6 py-3 rounded-sm transition">
+        &larr; Back to Front Page
+      </a>
+    </div>
+  </main>
+
+  <footer class="border-t-2 border-black bg-neutral-50 text-neutral-600 text-xs mt-auto">
+    <div class="max-w-5xl mx-auto px-4 py-4 text-center">
+      <p class="font-semibold text-neutral-900">&copy; <span id="yr"></span> Notun Alo. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      document.getElementById('yr').textContent = String(new Date().getFullYear());
+
+      // Resolve true site root on GitHub Pages even for nested 404 URLs like /Notun-Alo/a/b/c
+      var path = location.pathname || '/';
+      var root = '/';
+      if (location.hostname.endsWith('.github.io')) {
+        var segs = path.split('/').filter(Boolean);
+        if (segs.length > 0) root = '/' + segs[0] + '/';
+      }
+      document.getElementById('brandHome').setAttribute('href', root);
+      document.getElementById('backHomeBtn').setAttribute('href', root);
+    })();
+  </script>
+</body>
+</html>
